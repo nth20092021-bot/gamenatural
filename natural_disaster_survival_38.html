@@ -117,12 +117,12 @@
       <!-- Map Selector Pill -->
       <div class="flex items-center gap-1 bg-slate-900/80 backdrop-blur-md p-1 rounded-2xl border border-slate-700/80 shadow-xl">
         <button id="map-btn-0" data-map="0" title="Map 1: Đảo Trường Học Mở Rộng"
-                class="rbx-btn rbx-card-active flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-emerald-600/90 hover:bg-emerald-500 text-sm font-game">
+                class="rbx-btn flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-emerald-600/90 hover:bg-emerald-500 text-sm font-game">
           <span class="text-lg leading-none">🏫</span>
           <span class="text-xs font-extrabold">1</span>
         </button>
         <button id="map-btn-1" data-map="1" title="Map 2: Thị Trấn Hải Đăng Mở Rộng"
-                class="rbx-btn flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-sky-600/80 hover:bg-sky-500 text-sm font-game">
+                class="rbx-btn rbx-card-active flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-sky-600/80 hover:bg-sky-500 text-sm font-game">
           <span class="text-lg leading-none">🗼</span>
           <span class="text-xs font-extrabold">2</span>
         </button>
@@ -507,8 +507,8 @@
     };
 
     let gameState = STATE.IDLE;
-    let selectedMapMode = 0;
-    let currentMapIndex = 0;
+    let selectedMapMode = 1; // Mặc định Map 2 (Thị Trấn Hải Đăng)
+    let currentMapIndex = 1;
     let selectedDisMode = 2; // Mặc định Mưa Thiên Thạch
     let currentDisIndex = 2;
     let speedMultiplier = 1;
@@ -6263,7 +6263,7 @@
     function bootstrapGame() {
       if (gameBootstrapped) return;
       gameBootstrapped = true;
-      buildMap(0);
+      buildMap(currentMapIndex);
       spawnAllStudents();
       updateStartButtonUI();
       lastTime = performance.now();
