@@ -140,7 +140,7 @@
       <!-- Disaster Selector Pill -->
       <div class="flex items-center gap-1 bg-slate-900/80 backdrop-blur-md p-1 rounded-2xl border border-slate-700/80 shadow-xl">
         <button id="dis-btn-random" data-dis="random" title="Thiên Tai Ngẫu Nhiên"
-                class="rbx-btn rbx-card-active flex items-center justify-center w-9 h-8 rounded-xl bg-purple-600 hover:bg-purple-500 text-base">
+                class="rbx-btn flex items-center justify-center w-9 h-8 rounded-xl bg-purple-600/80 hover:bg-purple-500 text-base">
           ❓
         </button>
         <button id="dis-btn-0" data-dis="0" title="Lốc Xoáy Vòi Rồng"
@@ -152,7 +152,7 @@
           🧪
         </button>
         <button id="dis-btn-2" data-dis="2" title="Mưa Thiên Thạch Lửa"
-                class="rbx-btn flex items-center justify-center w-9 h-8 rounded-xl bg-slate-800 hover:bg-slate-700 text-lg">
+                class="rbx-btn rbx-card-active flex items-center justify-center w-9 h-8 rounded-xl bg-red-600 hover:bg-red-500 text-lg">
           ☄️
         </button>
       </div>
@@ -569,9 +569,9 @@
         // Selective Bloom targeting high-emission objects (meteors, lightning, acid glow, plasma pillars)
         bloomPass = new THREE.UnrealBloomPass(
           new THREE.Vector2(window.innerWidth, window.innerHeight),
-          0.38,  // Bloom vừa đủ nhìn dịu mắt
-          0.40,  // Radius
-          0.88   // Threshold
+          0.20,  // Bloom diu mat, chong choi hoan toan
+          0.35,  // Radius
+          0.96   // Threshold cao: may (<= 0.95) tuyet doi khong bi choi loa
         );
         composer.addPass(bloomPass);
 
@@ -713,44 +713,47 @@
           vec3 dir = normalize(vWorldPos);
           float h = clamp(dir.y, 0.0, 1.0);
 
-          // Crisp Anime Morning 4-Stop Sky Gradient (Warm Morning Mist Horizon -> Sky-Blue Mid -> Cobalt Zenith)
-          vec3 morningHorizon = mix(uHorizonColor, vec3(0.84, 0.95, 1.0), 0.36 * (1.0 - uStorminess));
-          vec3 lowerGrad = mix(morningHorizon, uMidColor, smoothstep(0.0, 0.28, h));
-          vec3 col = mix(lowerGrad, uTopColor, smoothstep(0.24, 0.86, h));
+          // Soothing Anime Morning Sky Gradient (Clear Morning Mist -> Sky-Blue Mid -> Deep Azure Zenith)
+          vec3 morningHorizon = mix(uHorizonColor, vec3(0.78, 0.90, 0.98), 0.45 * (1.0 - uStorminess));
+          vec3 lowerGrad = mix(morningHorizon, uMidColor, smoothstep(0.0, 0.26, h));
+          vec3 col = mix(lowerGrad, uTopColor, smoothstep(0.22, 0.85, h));
 
-          // Soft Golden-White Morning Horizon Glow
-          float horizonGlow = pow(max(1.0 - h, 0.0001), 4.5);
-          col += vec3(1.0, 0.94, 0.76) * horizonGlow * 0.20 * (1.0 - uStorminess * 0.85);
+          // Soft subtle ambient mist at the horizon (calm watercolor tone, zero glare)
+          float horizonGlow = pow(max(1.0 - h, 0.0001), 5.0);
+          col += vec3(0.68, 0.84, 0.96) * horizonGlow * 0.10 * (1.0 - uStorminess);
 
           // Gentle, pleasant Anime Sun Disc (comfortable, not blinding)
           float sunAmt = max(dot(dir, uSunDir), 0.0001);
-          float gentleCorona = pow(sunAmt, 16.0) * 0.28;
-          float sunDisc = smoothstep(0.9955, 0.9990, sunAmt) * 0.88;
-          col += vec3(1.0, 0.96, 0.88) * gentleCorona * (1.0 - uStorminess * 0.85);
-          col += vec3(1.0, 0.99, 0.96) * sunDisc * (1.0 - uStorminess * 0.90);
+          float gentleCorona = pow(sunAmt, 28.0) * 0.12;
+          float sunDisc = smoothstep(0.9972, 0.9996, sunAmt) * 0.45;
+          col += vec3(1.0, 0.95, 0.85) * gentleCorona * (1.0 - uStorminess * 0.90);
+          col += vec3(1.0, 0.98, 0.92) * sunDisc * (1.0 - uStorminess * 0.95);
 
-          // Fluffy Painterly Anime Clouds matching user reference artwork (Studio Ghibli / Makoto Shinkai style)
+          // Soft Anime Watercolor Clouds (Gentle, zero eye-strain, painterly Studio Ghibli style matching reference)
           if (dir.y > 0.015) {
-            vec2 uv = dir.xz / (dir.y + 0.28) * 0.92 + vec2(uTime * 0.007, uTime * 0.0025);
-            float c1 = fbm(uv * 1.8);
-            float c2 = fbm(uv * 3.6 + vec2(1.8, -1.2));
-            float c3 = fbm(uv * 7.2 + vec2(-2.5, 3.1));
-            float painterlyNoise = c1 * 0.65 + c2 * 0.25 + c3 * 0.10;
-            float cloudMask = smoothstep(0.48 - uStorminess * 0.18, 0.72, painterlyNoise) * smoothstep(0.015, 0.16, dir.y);
+            vec2 uv = dir.xz / (dir.y + 0.32) * 0.88 + vec2(uTime * 0.005, uTime * 0.0018);
+            float c1 = fbm(uv * 1.6);
+            float c2 = fbm(uv * 3.2 + vec2(1.7, -1.1));
+            float c3 = fbm(uv * 6.4 + vec2(-2.2, 2.8));
+            float painterlyNoise = c1 * 0.62 + c2 * 0.26 + c3 * 0.12;
+            float cloudMask = smoothstep(0.50 - uStorminess * 0.18, 0.74, painterlyNoise) * smoothstep(0.015, 0.18, dir.y);
 
-            // Reference artwork palette: Crisp white puffs, soft sky-blue shaded undersides, gentle warm sunlit rim
-            vec3 cloudShadow = vec3(0.60, 0.76, 0.92);
-            vec3 cloudBody = vec3(0.98, 0.99, 1.0);
-            vec3 cloudRim = vec3(1.0, 0.98, 0.94);
+            // True anime watercolor palette:
+            // Shaded underbelly is a soft cool slate/periwinkle blue
+            // Cloud body is a soft creamy pastel
+            // Highlighted rim is soft off-white (kept <= 0.94 to never trigger bloom glare!)
+            vec3 cloudShadow = vec3(0.50, 0.66, 0.84);
+            vec3 cloudBody   = vec3(0.78, 0.85, 0.92);
+            vec3 cloudRim    = vec3(0.88, 0.92, 0.95);
 
-            float lightFactor = clamp(c2 * 0.75 + pow(sunAmt, 2.0) * 0.35, 0.0, 1.0);
-            vec3 animeCloudCol = mix(cloudShadow, cloudBody, smoothstep(0.18, 0.52, lightFactor));
-            animeCloudCol = mix(animeCloudCol, cloudRim, smoothstep(0.55, 0.85, lightFactor));
+            float lightFactor = clamp(c2 * 0.82 + sunAmt * 0.12, 0.0, 1.0);
+            vec3 animeCloudCol = mix(cloudShadow, cloudBody, smoothstep(0.22, 0.58, lightFactor));
+            animeCloudCol = mix(animeCloudCol, cloudRim, smoothstep(0.58, 0.88, lightFactor));
 
-            vec3 stormCloudCol = mix(uTopColor * 0.50, uHorizonColor * 0.35, c2);
+            vec3 stormCloudCol = mix(uTopColor * 0.45, uHorizonColor * 0.32, c2);
             vec3 finalCloudCol = mix(animeCloudCol, stormCloudCol, uStorminess);
 
-            col = mix(col, finalCloudCol, cloudMask * 0.90);
+            col = mix(col, finalCloudCol, cloudMask * 0.88);
           }
           gl_FragColor = vec4(clamp(col, 0.0, 1.0), 1.0);
         }
