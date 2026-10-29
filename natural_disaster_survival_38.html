@@ -162,8 +162,8 @@
     <div class="flex items-center gap-2 bg-slate-900/85 backdrop-blur-md px-3.5 py-1.5 rounded-2xl border-2 border-slate-700/90 shadow-2xl pointer-events-auto">
       <div class="flex items-center gap-1.5">
         <span class="text-xl leading-none">🧑‍🎓</span>
-        <span id="alive-count" class="font-game text-2xl sm:text-3xl font-bold text-emerald-400 tracking-tight">38</span>
-        <span class="text-xs font-bold text-slate-400">/38</span>
+        <span id="alive-count" class="font-game text-2xl sm:text-3xl font-bold text-emerald-400 tracking-tight">28</span>
+        <span class="text-xs font-bold text-slate-400">/28</span>
       </div>
       <div class="h-5 w-px bg-slate-700 mx-0.5"></div>
       <div class="flex items-center gap-2 text-xs font-bold">
@@ -184,7 +184,7 @@
       </button>
       <button id="btn-roster" title="Danh sách 38 Học sinh (Nam/Nữ)"
               class="rbx-btn flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-indigo-600/90 hover:bg-indigo-500 text-sm font-bold">
-        👥<span class="text-xs hidden sm:inline">38</span>
+        👥<span class="text-xs hidden sm:inline">28</span>
       </button>
       <button id="btn-sound" title="Bật/Tắt Âm Thanh"
               class="rbx-btn flex items-center justify-center w-8 h-8 rounded-xl bg-slate-800 hover:bg-slate-700 text-base">
@@ -212,7 +212,7 @@
     <button id="btn-start"
             class="rbx-btn flex items-center gap-3 px-7 py-3.5 rounded-2xl bg-gradient-to-b from-emerald-400 to-emerald-600 hover:from-emerald-300 hover:to-emerald-500 text-slate-950 font-game text-xl sm:text-2xl font-bold shadow-[0_6px_0_rgb(5,150,105),0_12px_25px_rgba(16,185,129,0.5)] border-2 border-emerald-200">
       <span id="start-icon" class="text-2xl leading-none">▶️</span>
-      <span id="start-text" class="tracking-wide">38 ➔ 1</span>
+      <span id="start-text" class="tracking-wide">28 ➔ 1</span>
     </button>
 
     <button id="btn-reset" title="Làm mới Map"
@@ -238,10 +238,10 @@
 
     <!-- Bottom Replay Controls -->
     <div class="pop-in flex items-center gap-3 pointer-events-auto mb-6">
-      <button id="btn-play-again" title="Chơi lại tất cả 38 người"
+      <button id="btn-play-again" title="Chơi lại tất cả 28 người"
               class="rbx-btn flex items-center gap-2 px-6 py-3.5 rounded-2xl bg-gradient-to-b from-yellow-300 to-amber-500 text-slate-950 font-game text-xl font-bold shadow-[0_5px_0_rgb(180,83,9)] border-2 border-yellow-100">
         <span>🔄</span>
-        <span>38</span>
+        <span>28</span>
       </button>
       <button id="btn-play-exclude" title="Chơi ván tiếp (Ẩn người vừa thắng)"
               class="rbx-btn flex items-center gap-2 px-5 py-3.5 rounded-2xl bg-slate-800/95 hover:bg-slate-700 text-white font-game text-lg font-bold border-2 border-slate-600 shadow-xl">
@@ -258,7 +258,7 @@
       <div class="flex items-center justify-between px-4 py-3 bg-slate-800/90 border-b border-slate-700">
         <div class="flex items-center gap-2">
           <span class="text-2xl">🧑‍🎓</span>
-          <span class="font-game text-lg font-bold text-white">38 (👦 / 👧)</span>
+          <span class="font-game text-lg font-bold text-white">28 (👦 / 👧)</span>
         </div>
         <div class="flex items-center gap-1.5">
           <button id="btn-all-mixed" title="Xen kẽ Nam Nữ"
@@ -275,7 +275,7 @@
           </button>
           <button id="btn-restore-all" title="Khôi phục đủ 38 người"
                   class="rbx-btn px-2.5 py-1 rounded-xl bg-emerald-700/80 hover:bg-emerald-600 text-xs font-bold">
-            🔄 38
+            🔄 28
           </button>
           <button id="btn-close-roster"
                   class="rbx-btn w-8 h-8 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold flex items-center justify-center">
@@ -455,16 +455,47 @@
     // =========================================================================
     // 2. GAME STATE & 38 STUDENTS DATA
     // =========================================================================
-    const TOTAL_PLAYERS = 38;
+    const DEFAULT_STUDENT_NAMES = [
+      { name: "Vương Trần Thiên Ái", gender: "F" },
+      { name: "Nguyễn Hải Anh", gender: "M" },
+      { name: "Nguyễn Phạm Minh Anh", gender: "F" },
+      { name: "Nguyễn Ngọc Minh Châu", gender: "F" },
+      { name: "Nguyễn Trần Diễm Chi", gender: "F" },
+      { name: "Nguyễn Khải Hoàn", gender: "M" },
+      { name: "A Se Kinl", gender: "M" },
+      { name: "Trình Nhã Kỳ", gender: "F" },
+      { name: "Nguyễn Ngọc Bảo Linh", gender: "F" },
+      { name: "Phạm Hoàng Trúc Linh", gender: "F" },
+      { name: "Bành Gia Mẫn", gender: "F" },
+      { name: "Trần Thục Bảo Nghi", gender: "F" },
+      { name: "Thiên Ngọc", gender: "F" },
+      { name: "Bùi Hoàng Nhân", gender: "M" },
+      { name: "Vũ Nguyễn Yến Nhi", gender: "F" },
+      { name: "Ngô Tâm Như", gender: "F" },
+      { name: "Nguyễn Ngọc Thảo Như", gender: "F" },
+      { name: "Bùi Nguyễn Phúc Ni", gender: "F" },
+      { name: "Hoàng Phúc", gender: "M" },
+      { name: "Lê Ngọc Thuận", gender: "M" },
+      { name: "Nguyễn Minh Thư", gender: "F" },
+      { name: "Trần Ngọc Anh Thư", gender: "F" },
+      { name: "Hồ Ngọc Bảo Thy", gender: "F" },
+      { name: "Nguyễn Ngọc Phương Trang", gender: "F" },
+      { name: "Nguyễn Minh Triết", gender: "M" },
+      { name: "Huỳnh Ngọc Thanh Vy", gender: "F" },
+      { name: "Lê Ngọc Tường Vy", gender: "F" },
+      { name: "Đặng Thanh Xuân", gender: "F" }
+    ];
+    const TOTAL_PLAYERS = DEFAULT_STUDENT_NAMES.length;
     const GRAVITY = -38.0;
-    const ISLAND_RADIUS = 142.0; // Mega-scale sunset island radius (45+ shelters)!
+    const ISLAND_RADIUS = 142.0;
     const playersData = [];
     for (let i = 1; i <= TOTAL_PLAYERS; i++) {
+      const def = DEFAULT_STUDENT_NAMES[i - 1];
       playersData.push({
         id: i,
-        numStr: String(i).padStart(2, '0'),
-        name: `#${String(i).padStart(2, '0')}`,
-        gender: i % 2 === 1 ? 'M' : 'F',
+        numStr: String(i).padStart(2, "0"),
+        name: def ? def.name : ("#" + String(i).padStart(2, "0")),
+        gender: def ? def.gender : (i % 2 === 1 ? "M" : "F"),
         hairStyle: (i - 1) % 3,
         excluded: false
       });
@@ -481,8 +512,8 @@
     let gameState = STATE.IDLE;
     let selectedMapMode = 0;
     let currentMapIndex = 0;
-    let selectedDisMode = 'random';
-    let currentDisIndex = 0;
+    let selectedDisMode = 2; // Mặc định Mưa Thiên Thạch
+    let currentDisIndex = 2;
     let speedMultiplier = 1;
     let cameraMode = 0;
     let spectateId = null;
@@ -541,9 +572,9 @@
         // Selective Bloom targeting high-emission objects (meteors, lightning, acid glow, plasma pillars)
         bloomPass = new THREE.UnrealBloomPass(
           new THREE.Vector2(window.innerWidth, window.innerHeight),
-          0.72,  // Bloom strength
-          0.38,  // Radius
-          0.85   // Threshold
+          0.92,  // Bloom strength (tang do choi hoa nang)
+          0.44,  // Radius
+          0.78   // Threshold
         );
         composer.addPass(bloomPass);
 
@@ -694,11 +725,17 @@
           float horizonGlow = pow(max(1.0 - h, 0.0001), 4.5);
           col += vec3(1.0, 0.94, 0.76) * horizonGlow * 0.20 * (1.0 - uStorminess * 0.85);
 
-          // Radiant Morning Sun Disc, Golden-White Corona & Morning Rayleigh Halo
+          // Dazzling Sun Glare, Corona Bloom & Rayleigh Atmospheric Flare
           float sunAmt = max(dot(dir, uSunDir), 0.0001);
-          col += vec3(1.0, 0.90, 0.65) * pow(sunAmt, 5.0) * 0.26 * (1.0 - uStorminess * 0.80);
-          col += vec3(1.0, 0.96, 0.84) * pow(sunAmt, 22.0) * 0.42 * (1.0 - uStorminess * 0.85);
-          col += vec3(1.0, 0.99, 0.94) * smoothstep(0.9935, 0.9986, sunAmt) * 0.88 * (1.0 - uStorminess * 0.90);
+          float glareBroad = pow(sunAmt, 3.2) * 0.52;
+          float glareCorona = pow(sunAmt, 16.0) * 0.98;
+          float sunCore = pow(sunAmt, 120.0) * 2.4;
+          float sunDisk = smoothstep(0.993, 0.9992, sunAmt) * 4.2;
+          vec3 sunPlaneDir = normalize(vec3(dir.x, dir.y * 4.5, dir.z));
+          float streak = pow(max(dot(sunPlaneDir, normalize(vec3(uSunDir.x, uSunDir.y * 4.5, uSunDir.z))), 0.0), 260.0) * 0.45;
+          col += vec3(1.0, 0.92, 0.72) * glareBroad * (1.0 - uStorminess * 0.85);
+          col += vec3(1.0, 0.96, 0.85) * (glareCorona + streak) * (1.0 - uStorminess * 0.90);
+          col += vec3(1.0, 1.0, 0.98) * (sunCore + sunDisk) * (1.0 - uStorminess * 0.95);
 
           // Fluffy Sunlit Anime Morning Cumulus Clouds (Soft Sky-Blue Undersides + Snow-White Tops + Golden Silver Lining)
           if (dir.y > 0.02) {
@@ -998,8 +1035,8 @@
         skyTop: 0x0369a1, skyMid: 0x38bdf8, skyHorizon: 0xfde68a,
         oceanDeep: 0x075985, oceanShallow: 0x0891b2, oceanReflect: 0x7dd3fc, oceanFoam: 0xf8fafc,
         fogColor: 0x7dd3fc, bgColor: 0x38bdf8,
-        dirColor: 0xfff7ed, dirIntensity: 1.26, hemiSky: 0xe0f2fe, hemiGround: 0x1e293b, hemiIntensity: 0.56,
-        shadowTint: [0.66, 0.73, 0.86], litTint: [1.04, 1.02, 0.97], rimColor: [1.0, 0.90, 0.62],
+        dirColor: 0xfff7ed, dirIntensity: 1.55, hemiSky: 0xe0f2fe, hemiGround: 0x1e293b, hemiIntensity: 0.62,
+        shadowTint: [0.66, 0.73, 0.86], litTint: [1.14, 1.10, 1.02], rimColor: [1.0, 0.95, 0.78],
         sunPos: [120, 78, -92]
       },
       {
@@ -4041,7 +4078,13 @@
 
       // Arrange the 38 students in a clean 4-row curved amphitheater formation on the front plaza
       // facing the camera so every single student's face, uniform, and badge is clearly visible!
-      const rowCounts = [8, 9, 10, 11]; // 8 + 9 + 10 + 11 = 38
+      const numRows = 4;
+      const basePerRow = Math.floor(eligible.length / numRows);
+      const rem = eligible.length % numRows;
+      const rowCounts = [];
+      for (let r = 0; r < numRows; r++) {
+        rowCounts.push(basePerRow + (r >= numRows - rem ? 1 : 0));
+      }
       const rowRadii = [6.2, 8.8, 11.4, 14.0];
 
       eligible.forEach((p, idx) => {
