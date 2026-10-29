@@ -223,17 +223,14 @@
 
   <!-- WINNER SPOTLIGHT MODAL (Minimalist, Visual Celebration) -->
   <div id="winner-overlay" class="fixed inset-0 z-30 pointer-events-none hidden flex-col items-center justify-between py-14 px-4">
-    <!-- Top Crown Badge -->
-    <div class="pop-in flex flex-col items-center bg-slate-900/90 backdrop-blur-xl px-7 py-4 rounded-3xl border-4 border-yellow-400 shadow-[0_0_50px_rgba(250,204,21,0.65)] pointer-events-auto mt-4">
-      <div class="flex items-center gap-2 text-3xl sm:text-4xl mb-1">
-        <span>👑</span>
-        <span id="win-gender-icon">👦</span>
-        <span id="win-disaster-icon">🌪️</span>
-      </div>
-      <div id="win-number" class="font-game text-5xl sm:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-b from-yellow-200 via-yellow-400 to-amber-500 drop-shadow">
-        #01
-      </div>
-      <div id="win-name" class="text-base sm:text-lg font-extrabold text-white mt-0.5 tracking-wide"></div>
+    <!-- Top Crown Badge (Clean Full Name - Zero Icons) -->
+    <div class="pop-in flex flex-col items-center bg-slate-900/95 backdrop-blur-xl px-10 py-6 rounded-3xl border-4 border-yellow-400 shadow-[0_0_40px_rgba(250,204,21,0.55)] pointer-events-auto mt-4 text-center max-w-xl">
+      <div class="text-4xl sm:text-5xl mb-2 animate-bounce">👑</div>
+      <div class="text-xs sm:text-sm font-black tracking-widest text-yellow-300 uppercase mb-2">NGƯỜI SỐNG SÓT DUY NHẤT</div>
+      <div id="win-name" class="font-game text-2xl sm:text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-b from-yellow-100 via-yellow-300 to-amber-500 drop-shadow-lg px-2 py-1 leading-snug"></div>
+      <div id="win-number" class="hidden"></div>
+      <span id="win-gender-icon" class="hidden"></span>
+      <span id="win-disaster-icon" class="hidden"></span>
     </div>
 
     <!-- Bottom Replay Controls -->
@@ -253,12 +250,12 @@
 
   <!-- 38 STUDENTS ROSTER DRAWER (Toggle Nam/Nữ, Click to Spectate, or Edit Names) -->
   <div id="roster-modal" class="fixed inset-0 z-40 bg-slate-950/70 backdrop-blur-sm hidden items-center justify-center p-3">
-    <div class="bg-slate-900 border-2 border-slate-700 rounded-3xl w-full max-w-2xl max-h-[85vh] flex flex-col shadow-2xl overflow-hidden">
+    <div class="bg-slate-900 border-2 border-slate-700 rounded-3xl w-full max-w-4xl max-h-[85vh] flex flex-col shadow-2xl overflow-hidden">
       <!-- Modal Header -->
       <div class="flex items-center justify-between px-4 py-3 bg-slate-800/90 border-b border-slate-700">
         <div class="flex items-center gap-2">
           <span class="text-2xl">🧑‍🎓</span>
-          <span class="font-game text-lg font-bold text-white">28 (👦 / 👧)</span>
+          <span class="font-game text-lg font-bold text-white">Danh Sách Học Sinh (28)</span>
         </div>
         <div class="flex items-center gap-1.5">
           <button id="btn-all-mixed" title="Xen kẽ Nam Nữ"
@@ -285,7 +282,7 @@
       </div>
 
       <!-- 38 Grid -->
-      <div id="roster-grid" class="p-3 overflow-y-auto grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-2"></div>
+      <div id="roster-grid" class="p-4 overflow-y-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 max-h-[68vh]"></div>
     </div>
   </div>
 
@@ -572,9 +569,9 @@
         // Selective Bloom targeting high-emission objects (meteors, lightning, acid glow, plasma pillars)
         bloomPass = new THREE.UnrealBloomPass(
           new THREE.Vector2(window.innerWidth, window.innerHeight),
-          0.92,  // Bloom strength (tang do choi hoa nang)
-          0.44,  // Radius
-          0.78   // Threshold
+          0.38,  // Bloom vừa đủ nhìn dịu mắt
+          0.40,  // Radius
+          0.88   // Threshold
         );
         composer.addPass(bloomPass);
 
@@ -725,39 +722,36 @@
           float horizonGlow = pow(max(1.0 - h, 0.0001), 4.5);
           col += vec3(1.0, 0.94, 0.76) * horizonGlow * 0.20 * (1.0 - uStorminess * 0.85);
 
-          // Dazzling Sun Glare, Corona Bloom & Rayleigh Atmospheric Flare
+          // Gentle, pleasant Anime Sun Disc (comfortable, not blinding)
           float sunAmt = max(dot(dir, uSunDir), 0.0001);
-          float glareBroad = pow(sunAmt, 3.2) * 0.52;
-          float glareCorona = pow(sunAmt, 16.0) * 0.98;
-          float sunCore = pow(sunAmt, 120.0) * 2.4;
-          float sunDisk = smoothstep(0.993, 0.9992, sunAmt) * 4.2;
-          vec3 sunPlaneDir = normalize(vec3(dir.x, dir.y * 4.5, dir.z));
-          float streak = pow(max(dot(sunPlaneDir, normalize(vec3(uSunDir.x, uSunDir.y * 4.5, uSunDir.z))), 0.0), 260.0) * 0.45;
-          col += vec3(1.0, 0.92, 0.72) * glareBroad * (1.0 - uStorminess * 0.85);
-          col += vec3(1.0, 0.96, 0.85) * (glareCorona + streak) * (1.0 - uStorminess * 0.90);
-          col += vec3(1.0, 1.0, 0.98) * (sunCore + sunDisk) * (1.0 - uStorminess * 0.95);
+          float gentleCorona = pow(sunAmt, 16.0) * 0.28;
+          float sunDisc = smoothstep(0.9955, 0.9990, sunAmt) * 0.88;
+          col += vec3(1.0, 0.96, 0.88) * gentleCorona * (1.0 - uStorminess * 0.85);
+          col += vec3(1.0, 0.99, 0.96) * sunDisc * (1.0 - uStorminess * 0.90);
 
-          // Fluffy Sunlit Anime Morning Cumulus Clouds (Soft Sky-Blue Undersides + Snow-White Tops + Golden Silver Lining)
-          if (dir.y > 0.02) {
-            vec2 uv = dir.xz / (dir.y + 0.25) * 1.08 + vec2(uTime * 0.010, uTime * 0.004);
-            float c1 = fbm(uv * 2.0);
-            float c2 = fbm(uv * 4.0 + vec2(2.7, -1.8));
-            float cloudMask = smoothstep(0.46 - uStorminess * 0.18, 0.76, c1) * smoothstep(0.02, 0.18, dir.y);
+          // Fluffy Painterly Anime Clouds matching user reference artwork (Studio Ghibli / Makoto Shinkai style)
+          if (dir.y > 0.015) {
+            vec2 uv = dir.xz / (dir.y + 0.28) * 0.92 + vec2(uTime * 0.007, uTime * 0.0025);
+            float c1 = fbm(uv * 1.8);
+            float c2 = fbm(uv * 3.6 + vec2(1.8, -1.2));
+            float c3 = fbm(uv * 7.2 + vec2(-2.5, 3.1));
+            float painterlyNoise = c1 * 0.65 + c2 * 0.25 + c3 * 0.10;
+            float cloudMask = smoothstep(0.48 - uStorminess * 0.18, 0.72, painterlyNoise) * smoothstep(0.015, 0.16, dir.y);
 
-            vec3 cloudShadowCol = vec3(0.68, 0.81, 0.94);
-            vec3 cloudBrightBody = vec3(0.97, 0.99, 1.0);
-            vec3 cloudSunRim = mix(vec3(1.0, 0.98, 0.92), vec3(1.0, 0.94, 0.78), pow(sunAmt, 2.0));
+            // Reference artwork palette: Crisp white puffs, soft sky-blue shaded undersides, gentle warm sunlit rim
+            vec3 cloudShadow = vec3(0.60, 0.76, 0.92);
+            vec3 cloudBody = vec3(0.98, 0.99, 1.0);
+            vec3 cloudRim = vec3(1.0, 0.98, 0.94);
 
-            float lightFactor = clamp(c2 * 0.88 + pow(sunAmt, 2.5) * 0.32, 0.0, 1.0);
-            vec3 morningCloudCol = mix(cloudShadowCol, cloudBrightBody, smoothstep(0.20, 0.56, lightFactor));
-            morningCloudCol = mix(morningCloudCol, cloudSunRim, smoothstep(0.58, 0.86, lightFactor));
+            float lightFactor = clamp(c2 * 0.75 + pow(sunAmt, 2.0) * 0.35, 0.0, 1.0);
+            vec3 animeCloudCol = mix(cloudShadow, cloudBody, smoothstep(0.18, 0.52, lightFactor));
+            animeCloudCol = mix(animeCloudCol, cloudRim, smoothstep(0.55, 0.85, lightFactor));
 
-            vec3 stormCloudCol = mix(uTopColor * 0.55, uHorizonColor * 0.38, c2);
-            vec3 finalCloudCol = mix(morningCloudCol, stormCloudCol, uStorminess);
+            vec3 stormCloudCol = mix(uTopColor * 0.50, uHorizonColor * 0.35, c2);
+            vec3 finalCloudCol = mix(animeCloudCol, stormCloudCol, uStorminess);
 
-            col = mix(col, finalCloudCol, cloudMask * 0.86);
+            col = mix(col, finalCloudCol, cloudMask * 0.90);
           }
-
           gl_FragColor = vec4(clamp(col, 0.0, 1.0), 1.0);
         }
       `
@@ -1035,8 +1029,8 @@
         skyTop: 0x0369a1, skyMid: 0x38bdf8, skyHorizon: 0xfde68a,
         oceanDeep: 0x075985, oceanShallow: 0x0891b2, oceanReflect: 0x7dd3fc, oceanFoam: 0xf8fafc,
         fogColor: 0x7dd3fc, bgColor: 0x38bdf8,
-        dirColor: 0xfff7ed, dirIntensity: 1.55, hemiSky: 0xe0f2fe, hemiGround: 0x1e293b, hemiIntensity: 0.62,
-        shadowTint: [0.66, 0.73, 0.86], litTint: [1.14, 1.10, 1.02], rimColor: [1.0, 0.95, 0.78],
+        dirColor: 0xfff7ed, dirIntensity: 1.22, hemiSky: 0xe0f2fe, hemiGround: 0x1e293b, hemiIntensity: 0.55,
+        shadowTint: [0.68, 0.76, 0.88], litTint: [1.04, 1.02, 0.98], rimColor: [1.0, 0.92, 0.75],
         sunPos: [120, 78, -92]
       },
       {
@@ -2070,63 +2064,51 @@
       return tex;
     }
 
-    function createNumberBadgeSprite(player, statusMode = 'normal') {
-      const key = `badge_${player.id}_${player.gender}_${player.name}_${statusMode}`;
+    function createNumberBadgeSprite(player, statusMode = "normal") {
+      const key = `badge_clean_${player.id}_${player.gender}_${player.name}_${statusMode}`;
       if (textureCache[key]) {
         const mat = new THREE.SpriteMaterial({ map: textureCache[key], transparent: true, depthTest: false });
         const sp = new THREE.Sprite(mat);
-        sp.scale.set(2.65, 1.2, 1);
+        sp.scale.set(3.4, 0.85, 1);
         return sp;
       }
 
-      const c = document.createElement('canvas');
-      c.width = 176;
-      c.height = 76;
-      const ctx = c.getContext('2d');
+      const c = document.createElement("canvas");
+      c.width = 256;
+      c.height = 64;
+      const ctx = c.getContext("2d");
 
-      const isMale = player.gender === 'M';
-      ctx.fillStyle = statusMode === 'panic' ? 'rgba(127, 29, 29, 0.92)' : 'rgba(15, 23, 42, 0.86)';
+      const isMale = player.gender === "M";
+      ctx.fillStyle = statusMode === "panic" ? "rgba(127, 29, 29, 0.94)" : "rgba(15, 23, 42, 0.88)";
       ctx.strokeStyle =
-        statusMode === 'panic'
-          ? '#fb923c'
-          : statusMode === 'sheltered'
-          ? '#4ade80'
+        statusMode === "panic"
+          ? "#fb923c"
+          : statusMode === "sheltered"
+          ? "#4ade80"
           : isMale
-          ? '#38bdf8'
-          : '#f472b6';
-      ctx.lineWidth = 6;
+          ? "#38bdf8"
+          : "#f472b6";
+      ctx.lineWidth = 5;
 
-      drawRoundedRectPath(ctx, 6, 8, 164, 60, 26);
+      drawRoundedRectPath(ctx, 4, 6, 248, 52, 22);
       ctx.fill();
       ctx.stroke();
 
-      ctx.fillStyle = '#ffffff';
-      ctx.font = '900 29px "Inter", sans-serif';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      const accIcons = ['🕶️', '☂️', '🧢', '👒', '🎧', '🐱', '🎩', '👓', '🪽', '🛹', '🎸', '🚁'];
-      const accIcon = accIcons[(player.id - 1) % 12];
-      const label = player.name.length > 7 ? player.name.slice(0, 7) : player.name;
-      ctx.fillText(label, 68, 39);
-
-      ctx.font = '24px sans-serif';
-      if (statusMode === 'sheltered') {
-        ctx.fillText('🛡️', 134, 39);
-      } else if (statusMode === 'panic') {
-        ctx.fillText('😱', 134, 39);
-      } else {
-        ctx.fillText(accIcon, 134, 39);
-      }
+      ctx.fillStyle = "#ffffff";
+      const nameLen = player.name.length;
+      const fSize = nameLen > 22 ? 17 : (nameLen > 16 ? 19 : (nameLen > 12 ? 22 : 25));
+      ctx.font = `800 ${fSize}px "Inter", sans-serif`;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(player.name, 128, 33);
 
       const tex = new THREE.CanvasTexture(c);
       textureCache[key] = tex;
       const mat = new THREE.SpriteMaterial({ map: tex, transparent: true, depthTest: false });
       const sp = new THREE.Sprite(mat);
-      sp.scale.set(2.65, 1.2, 1);
+      sp.scale.set(3.4, 0.85, 1);
       return sp;
     }
-
-    // =========================================================================
     // 4. ROBLOX STUDENT 3D MODEL BUILDER + 38 UNIQUE 3D ACCESSORIES
     // =========================================================================
     const hairColors = [0x1c1917, 0x3f2305, 0x451a03, 0x27272a, 0x5c2d16, 0x7c2d12, 0x1e1b4b];
@@ -4924,7 +4906,7 @@
       const disIcons = ['🌪️', '🧪', '☄️'];
       const gIcon = player.gender === 'M' ? '👦' : '👧';
       item.className = 'flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-slate-900/80 border border-rose-500/60 text-xs font-extrabold text-white shadow pop-in';
-      item.innerHTML = `<span>${disIcons[disType]}</span><span>${gIcon}</span><span class="text-rose-300">${player.name}</span>`;
+      item.innerHTML = `<span>${disIcons[disType]}</span><span class="text-rose-300 font-bold">${player.name}</span>`;
       feed.prepend(item);
       while (feed.children.length > 5) {
         feed.removeChild(feed.lastChild);
@@ -5140,10 +5122,10 @@
         const disIcons = ['🌪️', '🧪', '☄️'];
         document.getElementById('win-gender-icon').textContent = designatedWinner.data.gender === 'M' ? '👦' : '👧';
         document.getElementById('win-disaster-icon').textContent = disIcons[currentDisIndex];
-        document.getElementById('win-number').textContent = `#${designatedWinner.data.numStr}`;
-        document.getElementById('win-name').textContent =
-          designatedWinner.data.name !== `#${designatedWinner.data.numStr}` ? designatedWinner.data.name : '';
-        document.getElementById('exclude-label').textContent = `🚫 #${designatedWinner.data.numStr}`;
+        // Clean winner display - zero icons, clean full name
+        const winNameEl = document.getElementById('win-name');
+        if (winNameEl) winNameEl.textContent = designatedWinner.data.name;
+        document.getElementById('exclude-label').textContent = 'Ẩn người thắng';
 
         const overlay = document.getElementById('winner-overlay');
         overlay.classList.remove('hidden');
@@ -6046,50 +6028,58 @@
     });
 
     function renderRosterGrid() {
-      const grid = document.getElementById('roster-grid');
-      grid.innerHTML = '';
+      const grid = document.getElementById(
+'roster-grid'
+);
+      grid.innerHTML = "";
 
       playersData.forEach(p => {
         const st = activeStudents.find(s => s.data.id === p.id);
         const isAlive = st ? st.alive : !p.excluded;
 
-        const card = document.createElement('div');
-        card.className = `flex items-center justify-between gap-1 p-1.5 rounded-xl border ${
+        const card = document.createElement("div");
+        card.className = `flex items-center gap-2 p-2 rounded-2xl border ${
           p.excluded
-            ? 'bg-slate-950/50 border-slate-800 opacity-45'
-            : (isAlive ? 'bg-slate-800/90 border-slate-600' : 'bg-rose-950/50 border-rose-800/60')
+            ? "bg-slate-950/50 border-slate-800 opacity-45"
+            : (isAlive ? "bg-slate-800/90 border-slate-600 shadow-md" : "bg-rose-950/50 border-rose-800/60")
         }`;
 
-        const accIcons = ['🕶️', '☂️', '🧢', '👒', '🎧', '🐱', '🎩', '👓', '🪽', '🛹', '🎸', '🚁'];
-        const accIcon = accIcons[(p.id - 1) % 12];
-        const genderBtn = document.createElement('button');
-        genderBtn.className = `rbx-btn px-1.5 h-7 rounded-lg flex items-center justify-center gap-0.5 text-xs ${
-          p.gender === 'M' ? 'bg-sky-600/40 border border-sky-400/50' : 'bg-pink-600/40 border border-pink-400/50'
+        // Number Pill (no icons)
+        const numPill = document.createElement("span");
+        numPill.className = "text-xs font-black px-2 py-1 rounded-lg bg-slate-900 text-slate-300 select-none shrink-0";
+        numPill.textContent = p.numStr;
+
+        // Clean Name Input - Full width, long name allowed, zero icons!
+        const nameInput = document.createElement("input");
+        nameInput.type = "text";
+        nameInput.value = p.name;
+        nameInput.maxLength = 40;
+        nameInput.className = "flex-1 min-w-0 bg-transparent text-sm font-bold text-white focus:outline-none focus:bg-slate-950 px-2 py-1 rounded border border-transparent focus:border-indigo-500 truncate";
+        nameInput.addEventListener("change", () => {
+          p.name = nameInput.value.trim() || (`#${p.numStr}`);
+          if (gameState === STATE.IDLE) spawnAllStudents();
+        });
+
+        // Gender button (Text: Nam / Nữ, zero emojis)
+        const genderBtn = document.createElement("button");
+        genderBtn.className = `rbx-btn px-2 h-7 rounded-lg text-xs font-bold shrink-0 ${
+          p.gender === "M" ? "bg-sky-600/40 text-sky-200 border border-sky-400/50" : "bg-pink-600/40 text-pink-200 border border-pink-400/50"
         }`;
-        genderBtn.textContent = `${p.gender === 'M' ? '👦' : '👧'}${accIcon}`;
-        genderBtn.title = 'Đổi Nam / Nữ';
-        genderBtn.addEventListener('click', () => {
+        genderBtn.textContent = p.gender === "M" ? "Nam" : "Nữ";
+        genderBtn.title = "Đổi Nam / Nữ";
+        genderBtn.addEventListener("click", () => {
           SFX.playClick();
-          p.gender = p.gender === 'M' ? 'F' : 'M';
+          p.gender = p.gender === "M" ? "F" : "M";
           if (gameState === STATE.IDLE) spawnAllStudents();
           renderRosterGrid();
         });
 
-        const nameInput = document.createElement('input');
-        nameInput.type = 'text';
-        nameInput.value = p.name;
-        nameInput.maxLength = 10;
-        nameInput.className = 'w-16 bg-transparent text-xs font-extrabold text-white focus:outline-none focus:bg-slate-950 px-1 rounded';
-        nameInput.addEventListener('change', () => {
-          p.name = nameInput.value.trim() || `#${p.numStr}`;
-          if (gameState === STATE.IDLE) spawnAllStudents();
-        });
-
-        const focusBtn = document.createElement('button');
-        focusBtn.className = 'rbx-btn w-6 h-6 rounded-lg bg-slate-700 hover:bg-slate-600 text-xs flex items-center justify-center';
-        focusBtn.textContent = p.excluded ? '➕' : '🎥';
-        focusBtn.title = p.excluded ? 'Cho vào lại' : 'Theo dõi học sinh này';
-        focusBtn.addEventListener('click', () => {
+        // Camera / Focus button
+        const focusBtn = document.createElement("button");
+        focusBtn.className = "rbx-btn w-7 h-7 rounded-lg bg-slate-700 hover:bg-slate-600 text-xs flex items-center justify-center shrink-0";
+        focusBtn.textContent = p.excluded ? "➕" : "🎥";
+        focusBtn.title = p.excluded ? "Khôi phục" : "Theo dõi";
+        focusBtn.addEventListener("click", () => {
           SFX.playClick();
           if (p.excluded) {
             p.excluded = false;
@@ -6097,13 +6087,14 @@
             renderRosterGrid();
           } else {
             spectateId = p.id;
-            document.getElementById('roster-modal').classList.add('hidden');
-            document.getElementById('roster-modal').classList.remove('flex');
+            document.getElementById("roster-modal").classList.add("hidden");
+            document.getElementById("roster-modal").classList.remove("flex");
           }
         });
 
-        card.appendChild(genderBtn);
+        card.appendChild(numPill);
         card.appendChild(nameInput);
+        card.appendChild(genderBtn);
         card.appendChild(focusBtn);
         grid.appendChild(card);
       });
