@@ -2753,7 +2753,7 @@
       mapGroup.add(bulb);
     }
 
-    function addBlock(w, h, d, x, y, z, color, buildingId, isRoof = false, opacity = 1, isFloorSlab = false, texType = 'brick', shapeType = 'box') {
+    function addBlock(w, h, d, x, y, z, color, buildingId, isRoof = false, opacity = 1, isFloorSlab = false, texType = 'brick', shapeType = 'box', isFoundation = false) {
       let geo;
       if (shapeType === 'foliage') {
         geo = new THREE.IcosahedronGeometry(w * 0.54, 2);
@@ -2785,9 +2785,24 @@
       destructibleGroup.add(mesh);
 
       if (!buildingHealth[buildingId]) {
-        buildingHealth[buildingId] = { total: 0, broken: 0, panicked: false };
+        buildingHealth[buildingId] = {
+          total: 0,
+          broken: 0,
+          foundationTotal: 0,
+          foundationBroken: 0,
+          collapsed: false,
+          panicked: false,
+          cx: x,
+          cz: z,
+          groundY: y
+        };
       }
       buildingHealth[buildingId].total++;
+
+      const isBaseComponent = isFoundation || (!isRoof && Math.abs(y - buildingHealth[buildingId].groundY) < 3.2);
+      if (isBaseComponent && !buildingId.startsWith('tree_')) {
+        buildingHealth[buildingId].foundationTotal++;
+      }
 
       const block = {
         mesh,
@@ -2795,12 +2810,86 @@
         buildingId,
         isRoof,
         isFloorSlab,
+        isFoundation: isBaseComponent && !buildingId.startsWith('tree_'),
         detached: false,
         vx: 0, vy: 0, vz: 0,
         rx: 0, ry: 0, rz: 0
       };
       destructibleBlocks.push(block);
       return block;
+    }
+
+    function detachBlock(b, vx, vy, vz, rx, ry, rz, hazardX = 0, hazardZ = 0) {
+      if (!b || b.detached) return;
+      b.detached = true;
+      b.life = 3.0;
+      b.vx = vx;
+      b.vy = vy;
+      b.vz = vz;
+      b.rx = rx !== undefined ? rx : (Math.random() - 0.5) * 9;
+      b.ry = ry !== undefined ? ry : (Math.random() - 0.5) * 9;
+      b.rz = rz !== undefined ? rz : (Math.random() - 0.5) * 9;
+
+      const bh = buildingHealth[b.buildingId];
+      if (bh) {
+        bh.broken++;
+        if (b.isFoundation) {
+          bh.foundationBroken++;
+          const isWinnerShelter = b.buildingId === designatedWinner?.targetSpot?.buildingId;
+          const fRatio = bh.foundationBroken / Math.max(bh.foundationTotal, 1);
+          if (!bh.collapsed && (fRatio >= (isWinnerShelter ? 0.85 : 0.35) || (isWinnerShelter ? bh.foundationBroken >= 10 : bh.foundationBroken >= 4))) {
+            triggerBuildingCollapse(b.buildingId, hazardX || b.mesh.position.x, hazardZ || b.mesh.position.z);
+          }
+        }
+      }
+    }
+
+    function triggerBuildingCollapse(buildingId, hazardX, hazardZ) {
+      if (!buildingId || buildingId.startsWith('tree_')) return;
+      const bh = buildingHealth[buildingId];
+      if (!bh || bh.collapsed) return;
+      bh.collapsed = true;
+
+      // Heavy structural rumble & camera shake
+      SFX.playBoom(1.0);
+      screenShake = Math.min(screenShake + 1.8, 2.8);
+
+      const bcx = bh.cx !== undefined ? bh.cx : hazardX;
+      const bcz = bh.cz !== undefined ? bh.cz : hazardZ;
+      const bgy = bh.groundY !== undefined ? bh.groundY : 0;
+
+      let tiltDx = bcx - hazardX;
+      let tiltDz = bcz - hazardZ;
+      let tiltLen = Math.hypot(tiltDx, tiltDz);
+      if (tiltLen < 0.1) {
+        const randAng = Math.random() * Math.PI * 2;
+        tiltDx = Math.cos(randAng);
+        tiltDz = Math.sin(randAng);
+      } else {
+        tiltDx /= tiltLen;
+        tiltDz /= tiltLen;
+      }
+
+      destructibleBlocks.forEach(b => {
+        if (b.buildingId !== buildingId || b.detached) return;
+        if (b.buildingId === designatedWinner?.targetSpot?.buildingId && b.isFloorSlab) return;
+
+        b.detached = true;
+        b.life = 3.5;
+
+        const by = b.mesh.position.y;
+        const hRatio = Math.max(0, (by - bgy) / 14);
+
+        b.vy = -3.2 - Math.random() * 4.8;
+        b.vx = tiltDx * (2.4 + hRatio * 6.5) + (Math.random() - 0.5) * 4.0;
+        b.vz = tiltDz * (2.4 + hRatio * 6.5) + (Math.random() - 0.5) * 4.0;
+
+        b.rx = (Math.random() - 0.5) * 6.0 + tiltDz * 2.5;
+        b.ry = (Math.random() - 0.5) * 4.5;
+        b.rz = (Math.random() - 0.5) * 6.0 - tiltDx * 2.5;
+      });
+
+      triggerShelterPanic(buildingId, bcx, bcz);
     }
 
     // Build Map-Distinctive Gazebo / Pavilion Shelter (Pagoda Pavilion, Santorini Dome Rotunda, or Sci-Fi Shield Pod)
@@ -4579,16 +4668,12 @@
             b.mesh.material = getTexturedMaterial('studs', 0x65a30d, 0x365314, 2, 2);
             b.acidCorroded = true;
           }
-          b.detached = true;
-          b.life = 3.0;
           corrodedBuildings.add(b.buildingId);
           const push = (1 - dist / radius) * 16 + 6;
-          b.vx = (dx / (dist || 1)) * push + (Math.random() - 0.5) * 14;
-          b.vy = 10 + Math.random() * 14;
-          b.vz = (dz / (dist || 1)) * push + (Math.random() - 0.5) * 14;
-          b.rx = (Math.random() - 0.5) * 9;
-          b.ry = (Math.random() - 0.5) * 9;
-          b.rz = (Math.random() - 0.5) * 9;
+          const vx = (dx / (dist || 1)) * push + (Math.random() - 0.5) * 14;
+          const vy = 10 + Math.random() * 14;
+          const vz = (dz / (dist || 1)) * push + (Math.random() - 0.5) * 14;
+          detachBlock(b, vx, vy, vz, undefined, undefined, undefined, x, z);
         }
       });
 
@@ -4828,15 +4913,12 @@
         const dz = b.mesh.position.z - z;
         const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
         if (dist < radius) {
-          b.detached = true;
           damagedBuildings.add(b.buildingId);
           const push = (1 - dist / radius) * 22 + 7;
-          b.vx = (dx / (dist || 1)) * push + (Math.random() - 0.5) * 9;
-          b.vy = 12 + Math.random() * 15;
-          b.vz = (dz / (dist || 1)) * push + (Math.random() - 0.5) * 9;
-          b.rx = (Math.random() - 0.5) * 9;
-          b.ry = (Math.random() - 0.5) * 9;
-          b.rz = (Math.random() - 0.5) * 9;
+          const vx = (dx / (dist || 1)) * push + (Math.random() - 0.5) * 9;
+          const vy = 12 + Math.random() * 15;
+          const vz = (dz / (dist || 1)) * push + (Math.random() - 0.5) * 9;
+          detachBlock(b, vx, vy, vz, undefined, undefined, undefined, x, z);
         }
       });
 
@@ -5491,12 +5573,11 @@
           const dz = b.mesh.position.z - f.position.z;
           const dist = Math.sqrt(dx * dx + dz * dz);
           if (dist < 15.5 && Math.random() < 0.28) {
-            b.detached = true;
             hitBuildings.add(b.buildingId);
-            b.vx = -dz * 2.1 + (Math.random() - 0.5) * 11;
-            b.vy = 16 + Math.random() * 14;
-            b.vz = dx * 2.1 + (Math.random() - 0.5) * 11;
-            b.rx = 5; b.ry = 6; b.rz = 4;
+            const vx = -dz * 2.1 + (Math.random() - 0.5) * 11;
+            const vy = 16 + Math.random() * 14;
+            const vz = dx * 2.1 + (Math.random() - 0.5) * 11;
+            detachBlock(b, vx, vy, vz, 5, 6, 4, f.position.x, f.position.z);
           }
         });
         hitBuildings.forEach(bId => triggerShelterPanic(bId, f.position.x, f.position.z));
@@ -5566,15 +5647,11 @@
               b.mesh.material = getTexturedMaterial('studs', 0x65a30d, 0x365314, 2, 2);
               b.acidCorroded = true;
             } else if (b.isRoof || Math.random() < 0.48) {
-              b.detached = true;
-              b.life = 3.0;
               hitBuildings.add(b.buildingId);
-              b.vx = (Math.random() - 0.5) * 18;
-              b.vy = 9 + Math.random() * 12;
-              b.vz = (Math.random() - 0.5) * 18;
-              b.rx = (Math.random() - 0.5) * 8;
-              b.ry = (Math.random() - 0.5) * 8;
-              b.rz = (Math.random() - 0.5) * 8;
+              const vx = (Math.random() - 0.5) * 18;
+              const vy = 9 + Math.random() * 12;
+              const vz = (Math.random() - 0.5) * 18;
+              detachBlock(b, vx, vy, vz, undefined, undefined, undefined, 0, 0);
             }
           }
           hitBuildings.forEach(bId => triggerShelterPanic(bId, 0, 0));
@@ -5701,7 +5778,7 @@
             if (dxP * dxP + dzP * dzP < 4.5 && st.panicTimer > 0) {
               const intactSpots = hidingSpots.filter(sp => {
                 const bh = buildingHealth[sp.buildingId];
-                return !bh || bh.broken < bh.total * 0.35;
+                return !bh || (!bh.collapsed && bh.broken < bh.total * 0.35);
               });
               if (intactSpots.length > 0 && Math.random() < 0.6) {
                 st.targetSpot = intactSpots[Math.floor(Math.random() * intactSpots.length)];
@@ -5726,7 +5803,7 @@
           const distSq = dx * dx + dz * dz;
 
           const bHealth = buildingHealth[st.targetSpot.buildingId];
-          const shelterCollapsed = bHealth && bHealth.broken > bHealth.total * 0.42;
+          const shelterCollapsed = bHealth && (bHealth.collapsed || bHealth.broken > bHealth.total * 0.42);
 
           if (distSq < 64 && !shelterCollapsed && st.targetSpot.y > terrainY) {
             supportY = st.targetSpot.y;
