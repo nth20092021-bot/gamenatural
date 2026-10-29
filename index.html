@@ -1135,9 +1135,9 @@
       } else if (type === 'japanese_wall') {
         // 🏯 MAP 1: ANIME ACADEMY & TRADITIONAL JAPANESE TIMBER-FRAME SHOJI/STUCCO WALL
         const wallGrad = ctx.createLinearGradient(0, 0, 0, 512);
-        wallGrad.addColorStop(0, #);
-        wallGrad.addColorStop(0.78, #);
-        wallGrad.addColorStop(1, #);
+        wallGrad.addColorStop(0, '#' + lightCol.getHexString());
+        wallGrad.addColorStop(0.78, '#' + baseCol.getHexString());
+        wallGrad.addColorStop(1, '#' + darkCol.getHexString());
         ctx.fillStyle = wallGrad;
         ctx.fillRect(0, 0, 512, 512);
 
@@ -1190,9 +1190,9 @@
       } else if (type === 'med_wall') {
         // 🏛️ MAP 2: SANTORINI / MEDITERRANEAN COASTAL VILLA STUCCO & MOSAIC WALL
         const wallGrad = ctx.createLinearGradient(0, 0, 0, 512);
-        wallGrad.addColorStop(0, #);
-        wallGrad.addColorStop(0.82, #);
-        wallGrad.addColorStop(1, #);
+        wallGrad.addColorStop(0, '#' + lightCol.getHexString());
+        wallGrad.addColorStop(0.82, '#' + baseCol.getHexString());
+        wallGrad.addColorStop(1, '#' + darkCol.getHexString());
         ctx.fillStyle = wallGrad;
         ctx.fillRect(0, 0, 512, 512);
 
@@ -1225,8 +1225,8 @@
       } else if (type === 'tech_wall') {
         // 🚀 MAP 3: SCI-FI MAGMA-TECH ARMORED CITADEL & NEON CONDUIT WALL
         const armorGrad = ctx.createLinearGradient(0, 0, 0, 512);
-        armorGrad.addColorStop(0, #);
-        armorGrad.addColorStop(0.6, #);
+        armorGrad.addColorStop(0, '#' + baseCol.getHexString());
+        armorGrad.addColorStop(0.6, '#' + darkCol.getHexString());
         armorGrad.addColorStop(1, '#0b1120');
         ctx.fillStyle = armorGrad;
         ctx.fillRect(0, 0, 512, 512);
