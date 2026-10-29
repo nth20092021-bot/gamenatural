@@ -5830,11 +5830,16 @@
             const swing = Math.sin(now * (st.panicking ? 0.032 : 0.022) + st.animPhase) * 1.25;
             if (st.panicking) {
               st.model.leftArm.rotation.x = Math.PI + Math.sin(now * 0.035 + st.animPhase) * 0.65;
-              st.model.rightArm.rotation.x = Math.PI - Math.sin(now * 0.035 + st.animPhase) * 0.65;
+              st.model.rightArm.rotation.x = st.model.hasUmbrella
+                ? -0.28 + Math.sin(now * 0.035 + st.animPhase) * 0.18
+                : Math.PI - Math.sin(now * 0.035 + st.animPhase) * 0.65;
             } else {
               st.model.leftArm.rotation.x = swing;
-              st.model.rightArm.rotation.x = -swing;
+              st.model.rightArm.rotation.x = st.model.hasUmbrella
+                ? -0.22 + Math.sin(now * 0.015) * 0.08
+                : -swing;
             }
+            if (!st.model.hasUmbrella) st.model.rightArm.rotation.z = 0;
             st.model.leftLeg.rotation.x = -swing;
             st.model.rightLeg.rotation.x = swing;
           } else {
@@ -5843,15 +5848,16 @@
             }
             if (gameState === STATE.DISASTER) {
               st.model.leftArm.rotation.x = -2.4 + Math.sin(now * 0.015 + st.animPhase) * 0.25;
-              st.model.rightArm.rotation.x = -2.4 + Math.cos(now * 0.015 + st.animPhase) * 0.25;
+              st.model.rightArm.rotation.x = st.model.hasUmbrella ? -0.25 : -2.4 + Math.cos(now * 0.015 + st.animPhase) * 0.25;
               st.model.leftLeg.rotation.x = 0;
               st.model.rightLeg.rotation.x = 0;
             } else {
               st.model.leftArm.rotation.x = 0;
-              st.model.rightArm.rotation.x = 0;
+              st.model.rightArm.rotation.x = st.model.hasUmbrella ? -0.22 : 0;
               st.model.leftLeg.rotation.x = 0;
               st.model.rightLeg.rotation.x = 0;
             }
+            if (!st.model.hasUmbrella) st.model.rightArm.rotation.z = 0;
           }
         } else if (gameState === STATE.VICTORY && st === designatedWinner) {
           supportY = Math.max(terrainY, st.targetSpot?.y || terrainY);
@@ -5860,7 +5866,13 @@
             st.onGround = false;
           }
           st.model.leftArm.rotation.x = Math.PI + Math.sin(now * 0.016) * 0.45;
-          st.model.rightArm.rotation.x = Math.PI - Math.sin(now * 0.016) * 0.45;
+          if (st.model.hasUmbrella) {
+            st.model.rightArm.rotation.x = -0.28 + Math.sin(now * 0.016) * 0.12;
+            st.model.rightArm.rotation.z = -0.16;
+          } else {
+            st.model.rightArm.rotation.x = Math.PI - Math.sin(now * 0.016) * 0.45;
+            st.model.rightArm.rotation.z = 0;
+          }
           st.model.leftLeg.rotation.x = Math.sin(now * 0.012) * 0.4;
           st.model.rightLeg.rotation.x = -Math.sin(now * 0.012) * 0.4;
         } else {
@@ -5869,7 +5881,8 @@
             st.onGround = false;
           }
           st.model.leftArm.rotation.x = Math.sin(now * 0.004 + st.animPhase) * 0.18;
-          st.model.rightArm.rotation.x = -Math.sin(now * 0.004 + st.animPhase) * 0.18;
+          st.model.rightArm.rotation.x = st.model.hasUmbrella ? -0.22 : -Math.sin(now * 0.004 + st.animPhase) * 0.18;
+          if (!st.model.hasUmbrella) st.model.rightArm.rotation.z = 0;
           st.model.leftLeg.rotation.x = 0;
           st.model.rightLeg.rotation.x = 0;
         }
