@@ -4886,14 +4886,7 @@
       stateDuration = 7.0;
       spectateId = null;
       userZoomFactor = 1.0;
-      // GSAP Skills: Cinematic camera sweep down to student plaza
-      if (typeof gsap !== 'undefined') {
-        gsap.killTweensOf(camera.position);
-        gsap.fromTo(camera.position,
-          { x: 0, y: 38, z: 62 },
-          { x: 0, y: 12.5, z: 27, duration: 2.4, ease: 'power2.out' }
-        );
-      }
+      screenShake = 0;
 
       showPhaseBanner('🏃', '🏠', 'border-emerald-400');
       updateStartButtonUI();
@@ -4991,19 +4984,6 @@
         designatedWinner.model.crown.visible = true;
         applyVictoryXRayWalls();
         designatedWinner.model.root.rotation.set(0, 0, 0);
-        // GSAP Skills: Smooth cinematic zoom-in focus onto designated winner
-        if (typeof gsap !== 'undefined') {
-          const targetX = designatedWinner.x + 9 * Math.cos(orbitAngle);
-          const targetY = designatedWinner.y + 4.2;
-          const targetZ = designatedWinner.z + 9 * Math.sin(orbitAngle);
-          gsap.to(camera.position, {
-            x: targetX,
-            y: targetY,
-            z: targetZ,
-            duration: 1.8,
-            ease: 'power3.out'
-          });
-        }
 
         const confColors = [0xfacc15, 0xf43f5e, 0x38bdf8, 0x4ade80, 0xa855f7];
         const confGeo = new THREE.BoxGeometry(0.35, 0.35, 0.08);
@@ -5711,53 +5691,54 @@
     }
 
     const _camTargetVec = new THREE.Vector3();
+    const _camPosGoal = new THREE.Vector3();
+    const _camLookGoal = new THREE.Vector3();
+    const _smoothLookAt = new THREE.Vector3(0, 3.2, 0);
+
     function updateCamera(dt, now) {
       if (!isDraggingCam) {
-        orbitAngle += dt * (gameState === STATE.VICTORY ? 0.52 : 0.15);
+        orbitAngle += dt * (gameState === STATE.VICTORY ? 0.35 : 0.15);
       }
       const baseAngle = gameState === STATE.IDLE ? Math.sin(orbitAngle * 1.4) * 0.42 : orbitAngle;
-      const totalAngle = baseAngle + userOrbitOffset + (camRig.angleOffset || 0);
+      const totalAngle = baseAngle + userOrbitOffset;
 
       if (screenShake > 0) {
         screenShake = Math.max(0, screenShake - dt * 2.8);
       }
-      // Silky smooth: only apply camera shake during active disaster impact (no jitter at start)
       const sx = screenShake > 0.02 ? (Math.random() - 0.5) * screenShake : 0;
       const sy = screenShake > 0.02 ? (Math.random() - 0.5) * screenShake : 0;
 
       if (gameState === STATE.VICTORY && designatedWinner) {
         const wx = designatedWinner.x;
-        const wy = designatedWinner.y + 2.6;
+        const wy = designatedWinner.y + 2.0;
         const wz = designatedWinner.z;
-        const camX = wx + Math.sin(totalAngle) * 11.5 * userZoomFactor;
-        const camZ = wz + Math.cos(totalAngle) * 11.5 * userZoomFactor;
-        camera.position.lerp(_camTargetVec.set(camX, wy + 3.2, camZ), Math.min(1, dt * 4.5));
-        camera.lookAt(wx, wy + 0.6, wz);
-        return;
-      }
-
-      if (spectateId !== null) {
+        _camLookGoal.set(wx, wy + 0.4, wz);
+        _camPosGoal.set(
+          wx + Math.sin(totalAngle) * 11.0 * userZoomFactor,
+          wy + 3.0,
+          wz + Math.cos(totalAngle) * 11.0 * userZoomFactor
+        );
+      } else if (spectateId !== null) {
         const target = activeStudents.find(s => s.data.id === spectateId && s.alive);
         if (target) {
-          const tx = target.x + Math.sin(totalAngle) * 16 * userZoomFactor;
-          const tz = target.z + Math.cos(totalAngle) * 16 * userZoomFactor;
-          camera.position.lerp(_camTargetVec.set(tx + sx, target.y + 8.5 + sy, tz), Math.min(1, dt * 5));
-          camera.lookAt(target.x, target.y + 2.2, target.z);
-          return;
+          _camLookGoal.set(target.x, target.y + 1.8, target.z);
+          _camPosGoal.set(
+            target.x + Math.sin(totalAngle) * 16 * userZoomFactor,
+            target.y + 8.5,
+            target.z + Math.cos(totalAngle) * 16 * userZoomFactor
+          );
         }
-      }
-
-      if (cameraMode === 0) {
-        let baseRad = camRig.radius;
-        let baseHeight = camRig.height;
-        let lookY = camRig.lookY;
+      } else if (cameraMode === 0) {
+        let baseRad = 26;
+        let baseHeight = 10.5;
+        let lookY = 3.2;
 
         if (gameState === STATE.HIDING) {
           const t = THREE.MathUtils.clamp(phaseTimer / stateDuration, 0, 1);
           const smoothT = t * t * (3 - 2 * t);
-          baseRad = THREE.MathUtils.lerp(camRig.radius, 168, smoothT);
-          baseHeight = THREE.MathUtils.lerp(camRig.height, 82, smoothT);
-          lookY = THREE.MathUtils.lerp(camRig.lookY, 6.0, smoothT);
+          baseRad = THREE.MathUtils.lerp(26, 168, smoothT);
+          baseHeight = THREE.MathUtils.lerp(10.5, 82, smoothT);
+          lookY = THREE.MathUtils.lerp(3.2, 6.0, smoothT);
         } else if (gameState === STATE.WARNING || gameState === STATE.DISASTER) {
           baseRad = 170;
           baseHeight = 84;
@@ -5768,20 +5749,32 @@
         const tx = Math.sin(totalAngle) * rad;
         const tz = Math.cos(totalAngle) * rad;
         const ty = THREE.MathUtils.clamp((baseHeight + userPitchOffset) * userZoomFactor, 8, 195);
-        camera.position.lerp(_camTargetVec.set(tx + sx, ty + sy, tz), Math.min(1, dt * 3.6));
-        camera.lookAt(sx, lookY + sy, 0);
+        _camLookGoal.set(0, lookY, 0);
+        _camPosGoal.set(tx, ty, tz);
       } else if (cameraMode === 1) {
         const rad = 68 * userZoomFactor;
         const tx = Math.sin(totalAngle * 1.3) * rad;
         const tz = Math.cos(totalAngle * 1.3) * rad;
-        camera.position.lerp(_camTargetVec.set(tx + sx, 28 * userZoomFactor + sy, tz), Math.min(1, dt * 3.8));
-        camera.lookAt(sx, 6 + sy, 0);
+        _camLookGoal.set(0, 6, 0);
+        _camPosGoal.set(tx, 28 * userZoomFactor, tz);
       } else {
-        camera.position.lerp(_camTargetVec.set(sx, 128 * userZoomFactor + sy, 54 * userZoomFactor), Math.min(1, dt * 4));
-        camera.lookAt(0, 0, -2);
+        _camLookGoal.set(0, 0, -2);
+        _camPosGoal.set(0, 128 * userZoomFactor, 54 * userZoomFactor);
       }
-    }
 
+      // Smooth interpolation for BOTH position and look-at target (zero snap, zero jerk)
+      const posLerpRate = Math.min(1.0, dt * (gameState === STATE.VICTORY ? 2.6 : 3.5));
+      const lookLerpRate = Math.min(1.0, dt * (gameState === STATE.VICTORY ? 3.0 : 3.8));
+
+      camera.position.lerp(_camPosGoal.set(
+        _camPosGoal.x + sx,
+        _camPosGoal.y + sy,
+        _camPosGoal.z
+      ), posLerpRate);
+
+      _smoothLookAt.lerp(_camLookGoal, lookLerpRate);
+      camera.lookAt(_smoothLookAt);
+    }
     // =========================================================================
     // 10. UI HANDLERS & CONTROLS WIRING
     // =========================================================================
@@ -5910,14 +5903,6 @@
       SFX.playClick();
       spectateId = null;
       userZoomFactor = 1.0;
-      // GSAP Skills: Cinematic camera sweep down to student plaza
-      if (typeof gsap !== 'undefined') {
-        gsap.killTweensOf(camera.position);
-        gsap.fromTo(camera.position,
-          { x: 0, y: 38, z: 62 },
-          { x: 0, y: 12.5, z: 27, duration: 2.4, ease: 'power2.out' }
-        );
-      }
       cameraMode = (cameraMode + 1) % 3;
       document.getElementById('cam-label').textContent = String(cameraMode + 1);
     });
