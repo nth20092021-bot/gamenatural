@@ -489,6 +489,13 @@
     let phaseTimer = 0;
     let stateDuration = 0;
     let screenShake = 0;
+    // GSAP Skills: Stabilized Camera Rig (Smooth swooping intro, zero position fighting or jitter)
+    const camRig = {
+      radius: 26,
+      height: 10.5,
+      lookY: 3.2,
+      angleOffset: 0
+    };
     let lastEliminatedWinnerId = null;
 
     // Interactive camera drag & zoom state
@@ -1597,14 +1604,14 @@
       const isWin = type === 'window';
       const effectiveBump = isWin ? 0 : (bumpScale || (type === 'grass' || type === 'studs' ? 0.14 : 0.10));
 
+      const winEmissiveCol = currentMapIndex === 2 ? new THREE.Color(0x06b6d4) : new THREE.Color(0xf59e0b);
       const mat = new THREE.MeshStandardMaterial({
         map,
-        // Disable dFdx/dFdy bumpMap on buildings & terrain so normals never flip black at far zoom!
         bumpMap: null,
-        roughness: isWin ? 0.22 : (type === 'roof' ? 0.58 : 0.78),
-        metalness: isWin ? 0.15 : 0.03,
-        emissive: isWin ? new THREE.Color(0xd97706) : new THREE.Color(0x000000),
-        emissiveIntensity: isWin ? 0.12 : 0.0,
+        roughness: isWin ? 0.12 : (type === 'roof' ? 0.55 : 0.75),
+        metalness: isWin ? 0.85 : 0.04,
+        emissive: isWin ? winEmissiveCol : (colorHex === 0xfacc15 || colorHex === 0x06b6d4 ? new THREE.Color(colorHex) : new THREE.Color(0x000000)),
+        emissiveIntensity: isWin ? 0.38 : (colorHex === 0xfacc15 || colorHex === 0x06b6d4 ? 0.65 : 0.0),
         transparent: opacity < 1,
         opacity
       });
@@ -3287,59 +3294,87 @@
       const groundY = getTerrainHeightAt(cx, cz) - 0.2;
       const mapWallTex = currentMapIndex === 0 ? 'japanese_wall' : (currentMapIndex === 1 ? 'med_wall' : 'tech_wall');
 
-      // Solid Ground Foundation Slab
-      addBlock(w + 1.2, 0.45, d + 1.2, cx, groundY + 0.2, cz, pillarColor, id, false, 1, true, 'concrete');
+      // 1. Layered Foundation & Entrance Steps
+      addBlock(w + 1.8, 0.55, d + 1.8, cx, groundY + 0.25, cz, pillarColor, id, false, 1, true, 'concrete');
+      addBlock(5.0, 0.25, 1.4, cx, groundY + 0.12, cz + (d / 2) + 1.2, pillarColor, id, false, 1, true, 'concrete');
+      addBlock(4.2, 0.25, 1.0, cx, groundY + 0.35, cz + (d / 2) + 0.7, pillarColor, id, false, 1, true, 'concrete');
 
       for (let f = 0; f < floors; f++) {
         const yBase = groundY + f * floorH;
         const slabH = 0.46;
         if (f > 0) {
-          // Single non-overlapping intermediate floor overhang slab (prevents coplanar Z-fighting!)
-          const slabExtra = currentMapIndex === 0 ? 2.1 : (currentMapIndex === 1 ? 1.8 : 1.2);
+          // Overhanging Architectural Floor Slab with Balcony Railings
+          const slabExtra = currentMapIndex === 0 ? 2.2 : (currentMapIndex === 1 ? 1.9 : 1.4);
           const slabCol = currentMapIndex === 0 ? roofColor : pillarColor;
-          const slabTex = currentMapIndex === 0 ? 'roof' : 'concrete';
+          const slabTex = currentMapIndex === 0 ? 'roof' : (currentMapIndex === 2 ? 'tech_wall' : 'concrete');
           addBlock(w + slabExtra, slabH, d + slabExtra, cx, yBase + slabH * 0.5, cz, slabCol, id, false, 1, true, slabTex);
+
+          // Cantilevered Balcony Railings
+          const railH = 0.82;
+          const railCol = currentMapIndex === 0 ? 0x991b1b : (currentMapIndex === 1 ? 0x1e293b : 0x0284c7);
+          const railTex = currentMapIndex === 2 ? 'window' : 'concrete';
+          addBlock(w + slabExtra - 0.4, railH, 0.22, cx, yBase + slabH + railH * 0.5, cz + (d + slabExtra) * 0.5 - 0.12, railCol, id, false, 0.9, false, railTex);
+          addBlock(0.22, railH, d + slabExtra - 0.4, cx - (w + slabExtra) * 0.5 + 0.12, yBase + slabH + railH * 0.5, cz, railCol, id, false, 0.9, false, railTex);
+          addBlock(0.22, railH, d + slabExtra - 0.4, cx + (w + slabExtra) * 0.5 - 0.12, yBase + slabH + railH * 0.5, cz, railCol, id, false, 0.9, false, railTex);
+
+          // Map 2: Glowing Cyan Neon Trim along Floor Slabs
+          if (currentMapIndex === 2) {
+            addBlock(w + slabExtra + 0.1, 0.18, 0.18, cx, yBase + slabH * 0.5, cz + (d + slabExtra) * 0.5 + 0.08, 0x06b6d4, id, false, 0.95, false, 'window');
+            addBlock(w + slabExtra + 0.1, 0.18, 0.18, cx, yBase + slabH * 0.5, cz - (d + slabExtra) * 0.5 - 0.08, 0x06b6d4, id, false, 0.95, false, 'window');
+          }
         }
+
         const hw = w / 2 - 0.55;
         const hd = d / 2 - 0.55;
-
-        // 4 Structural Corner Pillars (non-overlapping with floor slabs)
-        const pSize = currentMapIndex === 2 ? 1.45 : 1.2;
-        const pCol = currentMapIndex === 2 ? 0x1e293b : pillarColor;
+        const pSize = currentMapIndex === 2 ? 1.5 : 1.25;
+        const pCol = currentMapIndex === 2 ? 0x0f172a : pillarColor;
         const innerFloorH = floorH - slabH;
         const innerBaseY = yBase + slabH;
+
+        // 4 Architectural Corner Pilasters with Base & Top Trim
         [[-hw, -hd], [hw, -hd], [-hw, hd], [hw, hd]].forEach(([px, pz]) => {
           addBlock(pSize, innerFloorH, pSize, cx + px, innerBaseY + innerFloorH * 0.5, cz + pz, pCol, id, false, 1, false, 'concrete');
+          addBlock(pSize + 0.32, 0.26, pSize + 0.32, cx + px, innerBaseY + 0.13, cz + pz, pCol, id, false, 1, false, 'concrete');
+          addBlock(pSize + 0.32, 0.26, pSize + 0.32, cx + px, innerBaseY + innerFloorH - 0.13, cz + pz, pCol, id, false, 1, false, 'concrete');
         });
 
-        // Lower Map-Themed Architectural Walls fitting cleanly BETWEEN the 4 corner pillars (zero corner Z-fighting!)
+        // Lower Architectural Walls fitting cleanly BETWEEN pillars
         const spanW = Math.max(2.0, w - 1.1 - pSize);
         const spanD = Math.max(2.0, d - 1.1 - pSize);
-        const lowH = innerFloorH * 0.54;
+        const lowH = innerFloorH * 0.52;
         const lowY = innerBaseY + lowH * 0.5;
         addBlock(spanW, lowH, 0.72, cx, lowY, cz - hd, wallColor, id, false, 1, false, mapWallTex);
         addBlock(0.72, lowH, spanD, cx - hw, lowY, cz, wallColor, id, false, 1, false, mapWallTex);
         addBlock(0.72, lowH, spanD, cx + hw, lowY, cz, wallColor, id, false, 1, false, mapWallTex);
 
         if (f === 0) {
-          // Ground floor front wall with framed entrance doorway + Entrance Portico Awning!
-          const wingW = Math.max(1.4, (spanW - 3.6) * 0.5);
+          // Grand Framed Entrance with Portico Awning & Columns
+          const wingW = Math.max(1.4, (spanW - 3.8) * 0.5);
           addBlock(wingW, lowH, 0.72, cx - spanW * 0.5 + wingW * 0.5, lowY, cz + hd, wallColor, id, false, 1, false, mapWallTex);
           addBlock(wingW, lowH, 0.72, cx + spanW * 0.5 - wingW * 0.5, lowY, cz + hd, wallColor, id, false, 1, false, mapWallTex);
-          // Front Entrance Portico Canopy (offset cleanly outward so it never intersects the front wall)
-          addBlock(4.8, 0.42, 2.0, cx, innerBaseY + lowH + 0.22, cz + hd + 1.42, roofColor, id, true, 1, false, 'roof');
+
+          const canopyY = innerBaseY + lowH + 0.22;
+          addBlock(5.2, 0.44, 2.2, cx, canopyY, cz + hd + 1.4, roofColor, id, true, 1, false, 'roof');
+          addBlock(0.5, lowH, 0.5, cx - 2.1, innerBaseY + lowH * 0.5, cz + hd + 2.1, pillarColor, id, false, 1, false, 'concrete', 'cylinder');
+          addBlock(0.5, lowH, 0.5, cx + 2.1, innerBaseY + lowH * 0.5, cz + hd + 2.1, pillarColor, id, false, 1, false, 'concrete', 'cylinder');
+          addBlock(0.65, 0.65, 0.65, cx, canopyY - 0.45, cz + hd + 0.8, 0xfacc15, id, false, 0.95, false, 'window');
         } else {
           addBlock(spanW, lowH, 0.72, cx, lowY, cz + hd, wallColor, id, false, 1, false, mapWallTex);
         }
 
-        // Upper Window & Wall Clerestory Band sitting cleanly on top of lower walls and between corner pillars
-        const upH = innerFloorH * 0.46;
+        // Upper Window Gallery with Structural Mullions & Warm Glowing Panes
+        const upH = innerFloorH * 0.48;
         const upY = innerBaseY + lowH + upH * 0.5;
         addBlock(spanW, upH, 0.54, cx, upY, cz - hd, 0x38bdf8, id, false, 1, false, 'window');
         addBlock(spanW, upH, 0.54, cx, upY, cz + hd, 0x38bdf8, id, false, 1, false, 'window');
         addBlock(0.54, upH, spanD, cx - hw, upY, cz, 0x38bdf8, id, false, 1, false, 'window');
         addBlock(0.54, upH, spanD, cx + hw, upY, cz, 0x38bdf8, id, false, 1, false, 'window');
 
+        // Central Window Cross-Frame Mullions
+        addBlock(0.32, upH, 0.62, cx, upY, cz - hd, 0x1e293b, id, false, 1, false, 'concrete');
+        addBlock(0.32, upH, 0.62, cx, upY, cz + hd, 0x1e293b, id, false, 1, false, 'concrete');
+
+        // Hiding spots
         const cols = Math.max(2, Math.floor(w / 4.2));
         const rows = Math.max(2, Math.floor(d / 4.2));
         for (let r = 0; r < rows; r++) {
@@ -3357,32 +3392,51 @@
         }
       }
 
-      // Map-Distinctive Roof Crown Architecture!
+      // 3. Map-Distinctive Roof Crown & Architectural Features
       const topY = groundY + floors * floorH;
-      addBlock(w + 2.0, 0.68, d + 2.0, cx, topY + 0.34, cz, roofColor, id, true, 1, true, 'roof');
-      const roofPeakH = Math.min(4.2, Math.max(2.4, Math.min(w, d) * 0.24));
+      const roofPeakH = Math.min(4.4, Math.max(2.6, Math.min(w, d) * 0.25));
+
+      addBlock(w + 2.4, 0.72, d + 2.4, cx, topY + 0.36, cz, roofColor, id, true, 1, true, 'roof');
 
       if (currentMapIndex === 0) {
-        // Map 1: Double-Tiered Japanese Pagoda Hip Roof + Golden Finial Spire + Chimney
-        addBlock(w + 2.4, roofPeakH, d + 2.4, cx, topY + 0.68 + roofPeakH * 0.5, cz, roofColor, id, true, 1, false, 'roof', 'pyramid');
-        addBlock(w * 0.56, roofPeakH * 0.65, d * 0.56, cx, topY + 0.68 + roofPeakH * 0.95, cz, roofColor, id, true, 1, false, 'roof', 'pyramid');
-        addBlock(0.65, 2.2, 0.65, cx, topY + 0.68 + roofPeakH * 1.4, cz, 0xfacc15, id, true, 1, false, 'concrete', 'cylinder');
-        addBlock(1.4, roofPeakH + 1.1, 1.4, cx + w * 0.26, topY + 0.68 + roofPeakH * 0.55, cz - d * 0.22, 0x991b1b, id, true, 1, false, 'brick');
+        // 🏯 MAP 1: Multi-Tier Curved Pagoda Roof + 4 Corner Glowing Chochin Paper Lanterns
+        addBlock(w + 2.8, roofPeakH, d + 2.8, cx, topY + 0.72 + roofPeakH * 0.5, cz, roofColor, id, true, 1, false, 'roof', 'pyramid');
+        addBlock(w * 0.58, roofPeakH * 0.65, d * 0.58, cx, topY + 0.72 + roofPeakH * 0.95, cz, roofColor, id, true, 1, false, 'roof', 'pyramid');
+        addBlock(0.72, 2.5, 0.72, cx, topY + 0.72 + roofPeakH * 1.45, cz, 0xfacc15, id, true, 1, false, 'concrete', 'cylinder');
+        addBlock(1.5, roofPeakH + 1.2, 1.5, cx + w * 0.26, topY + 0.72 + roofPeakH * 0.55, cz - d * 0.22, 0x991b1b, id, true, 1, false, 'brick');
+
+        // 4 Corner Hanging Glowing Chochin Lanterns
+        const hwL = (w + 2.4) * 0.5 - 0.4;
+        const hdL = (d + 2.4) * 0.5 - 0.4;
+        [[-hwL, -hdL], [hwL, -hdL], [-hwL, hdL], [hwL, hdL]].forEach(([lx, lz]) => {
+          addBlock(0.2, 0.4, 0.2, cx + lx, topY + 0.2, cz + lz, 0x3f2305, id, false, 1, false, 'wood');
+          addBlock(0.65, 0.9, 0.65, cx + lx, topY - 0.35, cz + lz, 0xf59e0b, id, false, 0.95, false, 'window', 'cylinder');
+        });
+
       } else if (currentMapIndex === 1) {
-        // Map 2: Mediterranean Santorini Dome or Terracotta Hip Roof with Cupola Lantern
+        // 🏛️ MAP 2: Santorini Cobalt Blue Domes / Arched Bell Belfries & Rooftop Pergolas
         if (glass || floors >= 3) {
-          addBlock(w * 0.78, roofPeakH * 1.35, d * 0.78, cx, topY + 0.68 + roofPeakH * 0.45, cz, roofColor, id, true, 1, false, 'roof', 'foliage');
-          addBlock(1.6, 1.8, 1.6, cx, topY + 0.68 + roofPeakH * 1.25, cz, 0xffffff, id, true, 1, false, 'med_wall', 'cylinder');
+          addBlock(w * 0.82, roofPeakH * 1.4, d * 0.82, cx, topY + 0.72 + roofPeakH * 0.45, cz, 0x0284c7, id, true, 1, false, 'roof', 'foliage');
+          addBlock(w * 0.84, 0.8, d * 0.84, cx, topY + 0.72 + 0.4, cz, 0xffffff, id, false, 1, false, 'med_wall', 'cylinder');
+          addBlock(0.8, 1.8, 0.8, cx, topY + 0.72 + roofPeakH * 1.35, cz, 0xfacc15, id, true, 1, false, 'concrete', 'cylinder');
         } else {
-          addBlock(w + 2.2, roofPeakH, d + 2.2, cx, topY + 0.68 + roofPeakH * 0.5, cz, roofColor, id, true, 1, false, 'roof', 'pyramid');
-          addBlock(2.6, 1.8, 2.6, cx, topY + 0.68 + roofPeakH * 0.95, cz, 0xffffff, id, true, 1, false, 'med_wall');
+          addBlock(w + 2.2, roofPeakH, d + 2.2, cx, topY + 0.72 + roofPeakH * 0.5, cz, roofColor, id, true, 1, false, 'roof', 'pyramid');
+          addBlock(2.8, 2.4, 1.2, cx, topY + 0.72 + roofPeakH * 0.95 + 1.2, cz, 0xffffff, id, true, 1, false, 'med_wall');
+          addBlock(0.7, 0.9, 0.7, cx, topY + 0.72 + roofPeakH * 0.95 + 1.0, cz, 0xd97706, id, false, 1, false, 'concrete', 'cylinder');
         }
+
+        // Rooftop Pergola with Pink Bougainvillea Flowers
+        addBlock(4.2, 0.3, 4.2, cx - w * 0.28, topY + 0.72 + 2.2, cz + d * 0.25, 0x78350f, id, false, 1, false, 'wood');
+        addBlock(3.6, 1.2, 3.6, cx - w * 0.28, topY + 0.72 + 2.8, cz + d * 0.25, 0xec4899, id, false, 0.95, false, 'foliage');
+
       } else {
-        // Map 3: Sci-Fi Citadel Roof with Armored Penthouse, Twin Cooling Towers & Neon Core
-        addBlock(w * 0.76, roofPeakH * 0.65, d * 0.76, cx, topY + 0.68 + roofPeakH * 0.32, cz, 0x1e293b, id, true, 1, false, 'tech_wall');
-        addBlock(w * 0.52, roofPeakH * 0.85, d * 0.52, cx, topY + 0.68 + roofPeakH * 0.85, cz, roofColor, id, true, 1, false, 'roof', 'pyramid');
-        addBlock(1.8, roofPeakH + 1.8, 1.8, cx - w * 0.25, topY + 0.68 + roofPeakH * 0.6, cz - d * 0.2, 0x334155, id, true, 1, false, 'tech_wall', 'cylinder');
-        addBlock(1.2, 2.2, 1.2, cx + w * 0.25, topY + 0.68 + roofPeakH * 0.8, cz + d * 0.2, 0x38bdf8, id, true, 0.9, false, 'window', 'cylinder');
+        // 🚀 MAP 3: Sci-Fi Armored Citadel Rooftop with Tech Penthouse, Ventilation Turbines & Neon Conduit
+        addBlock(w * 0.72, roofPeakH * 0.75, d * 0.72, cx, topY + 0.72 + roofPeakH * 0.38, cz, 0x0f172a, id, true, 1, false, 'tech_wall');
+        addBlock(w * 0.52, roofPeakH * 0.8, d * 0.52, cx, topY + 0.72 + roofPeakH * 0.85, cz, roofColor, id, true, 1, false, 'roof', 'pyramid');
+        addBlock(2.4, 1.6, 2.4, cx - w * 0.28, topY + 0.72 + 0.8, cz - d * 0.22, 0x334155, id, true, 1, false, 'tech_wall', 'cylinder');
+        addBlock(1.2, roofPeakH + 2.2, 1.2, cx + w * 0.26, topY + 0.72 + roofPeakH * 0.6, cz + d * 0.22, 0x06b6d4, id, true, 0.95, false, 'window', 'cylinder');
+        addBlock(0.35, 4.5, 0.35, cx, topY + 0.72 + roofPeakH * 1.45, cz, 0xe2e8f0, id, true, 1, false, 'concrete', 'cylinder');
+        addBlock(0.6, 0.6, 0.6, cx, topY + 0.72 + roofPeakH * 1.45 + 2.3, cz, 0xef4444, id, false, 0.95, false, 'window');
       }
 
       hidingSpots.push({ x: cx - 1.6, y: topY + 0.75, z: cz, buildingId: id, roofTier: floors + 1 });
@@ -5662,13 +5716,14 @@
         orbitAngle += dt * (gameState === STATE.VICTORY ? 0.52 : 0.15);
       }
       const baseAngle = gameState === STATE.IDLE ? Math.sin(orbitAngle * 1.4) * 0.42 : orbitAngle;
-      const totalAngle = baseAngle + userOrbitOffset;
+      const totalAngle = baseAngle + userOrbitOffset + (camRig.angleOffset || 0);
 
       if (screenShake > 0) {
         screenShake = Math.max(0, screenShake - dt * 2.8);
       }
-      const sx = (Math.random() - 0.5) * screenShake;
-      const sy = (Math.random() - 0.5) * screenShake;
+      // Silky smooth: only apply camera shake during active disaster impact (no jitter at start)
+      const sx = screenShake > 0.02 ? (Math.random() - 0.5) * screenShake : 0;
+      const sy = screenShake > 0.02 ? (Math.random() - 0.5) * screenShake : 0;
 
       if (gameState === STATE.VICTORY && designatedWinner) {
         const wx = designatedWinner.x;
@@ -5693,26 +5748,20 @@
       }
 
       if (cameraMode === 0) {
-        // Dynamic Close-to-Wide Camera Zoom:
-        // - In IDLE: starts up close (rad = 26, height = 11.5) around the central plaza so all 38 students are crystal clear, then gently breathes out
-        // - In HIDING: starts close (rad = 26) as students burst out of the plaza, and smoothly zooms out to wide panoramic (rad = 156, height = 76) to cover the entire huge island!
-        let baseRad = 156;
-        let baseHeight = 76;
-        let lookY = 5.5;
+        let baseRad = camRig.radius;
+        let baseHeight = camRig.height;
+        let lookY = camRig.lookY;
 
-        if (gameState === STATE.IDLE) {
-          baseRad = 26;
-          baseHeight = 10.5;
-          lookY = 3.2;
-        } else if (gameState === STATE.HIDING) {
+        if (gameState === STATE.HIDING) {
           const t = THREE.MathUtils.clamp(phaseTimer / stateDuration, 0, 1);
           const smoothT = t * t * (3 - 2 * t);
-          baseRad = THREE.MathUtils.lerp(26, 168, smoothT);
-          baseHeight = THREE.MathUtils.lerp(10.5, 82, smoothT);
-          lookY = THREE.MathUtils.lerp(3.2, 6.0, smoothT);
+          baseRad = THREE.MathUtils.lerp(camRig.radius, 168, smoothT);
+          baseHeight = THREE.MathUtils.lerp(camRig.height, 82, smoothT);
+          lookY = THREE.MathUtils.lerp(camRig.lookY, 6.0, smoothT);
         } else if (gameState === STATE.WARNING || gameState === STATE.DISASTER) {
           baseRad = 170;
           baseHeight = 84;
+          lookY = 6.0;
         }
 
         const rad = baseRad * userZoomFactor;
