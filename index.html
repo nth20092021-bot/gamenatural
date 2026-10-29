@@ -1135,98 +1135,125 @@
       } else if (type === 'japanese_wall') {
         // 🏯 MAP 1: ANIME ACADEMY & TRADITIONAL JAPANESE TIMBER-FRAME SHOJI/STUCCO WALL
         const wallGrad = ctx.createLinearGradient(0, 0, 0, 512);
-        wallGrad.addColorStop(0, `#${lightCol.getHexString()}`);
-        wallGrad.addColorStop(0.78, `#${baseCol.getHexString()}`);
-        wallGrad.addColorStop(1, `#${darkCol.getHexString()}`);
+        wallGrad.addColorStop(0, #);
+        wallGrad.addColorStop(0.78, #);
+        wallGrad.addColorStop(1, #);
         ctx.fillStyle = wallGrad;
         ctx.fillRect(0, 0, 512, 512);
 
         // Dark Roasted Cedar Timber Pillars & Horizontal Nageshi Beams
         ctx.fillStyle = '#3f2305';
-        ctx.fillRect(0, 0, 512, 26);
-        ctx.fillRect(0, 236, 512, 18);
-        ctx.fillRect(0, 462, 512, 50);
+        ctx.fillRect(0, 0, 512, 28);
+        ctx.fillRect(0, 234, 512, 20);
+        ctx.fillRect(0, 460, 512, 52);
         for (let x = 0; x <= 488; x += 122) {
-          ctx.fillRect(x, 0, 22, 512);
-          bumpCtx.fillStyle = '#d8d8d8';
-          bumpCtx.fillRect(x, 0, 22, 512);
+          ctx.fillRect(x, 0, 24, 512);
+          bumpCtx.fillStyle = '#e8e8e8';
+          bumpCtx.fillRect(x, 0, 24, 512);
+        }
+
+        // Cedar Wood Grain Lines on pillars
+        ctx.fillStyle = 'rgba(20, 10, 5, 0.22)';
+        for (let x = 0; x <= 488; x += 122) {
+          ctx.fillRect(x + 5, 0, 2, 512);
+          ctx.fillRect(x + 15, 0, 3, 512);
+        }
+
+        // Brass Joinery Corner Brackets at beam intersections
+        ctx.fillStyle = '#d97706';
+        for (let x = 0; x <= 488; x += 122) {
+          [28, 234, 460].forEach(by => {
+            ctx.fillRect(x - 4, by - 4, 32, 10);
+            ctx.fillRect(x + 7, by - 8, 10, 26);
+          });
         }
 
         // Subtle Kumiko Wooden Lattice & Warm Gold Crest Medallions
-        ctx.strokeStyle = 'rgba(63, 35, 5, 0.25)';
-        ctx.lineWidth = 4;
-        for (let lx = 44; lx < 480; lx += 40) {
+        ctx.strokeStyle = 'rgba(63, 35, 5, 0.28)';
+        ctx.lineWidth = 3.5;
+        for (let lx = 40; lx < 480; lx += 36) {
           ctx.beginPath();
-          ctx.moveTo(lx, 26);
-          ctx.lineTo(lx, 236);
+          ctx.moveTo(lx, 28);
+          ctx.lineTo(lx, 234);
           ctx.stroke();
         }
-        ctx.fillStyle = '#f59e0b';
+        ctx.fillStyle = '#fbbf24';
         [68, 190, 312, 434].forEach(mx => {
           ctx.beginPath();
-          ctx.arc(mx, 350, 14, 0, Math.PI * 2);
+          ctx.arc(mx, 348, 15, 0, Math.PI * 2);
           ctx.fill();
+          ctx.strokeStyle = '#92400e';
+          ctx.lineWidth = 2.5;
+          ctx.stroke();
         });
 
       } else if (type === 'med_wall') {
         // 🏛️ MAP 2: SANTORINI / MEDITERRANEAN COASTAL VILLA STUCCO & MOSAIC WALL
         const wallGrad = ctx.createLinearGradient(0, 0, 0, 512);
-        wallGrad.addColorStop(0, `#${lightCol.getHexString()}`);
-        wallGrad.addColorStop(0.82, `#${baseCol.getHexString()}`);
-        wallGrad.addColorStop(1, `#${darkCol.getHexString()}`);
+        wallGrad.addColorStop(0, #);
+        wallGrad.addColorStop(0.82, #);
+        wallGrad.addColorStop(1, #);
         ctx.fillStyle = wallGrad;
         ctx.fillRect(0, 0, 512, 512);
 
-        // Aegean Blue & Terracotta Decorative Mosaic Tile Frieze Band
+        // Aegean Cobalt Blue & Terracotta Mosaic Frieze Band
         ctx.fillStyle = '#0284c7';
-        ctx.fillRect(0, 34, 512, 22);
-        ctx.fillStyle = '#f59e0b';
-        for (let d = 16; d < 500; d += 32) {
+        ctx.fillRect(0, 32, 512, 26);
+        ctx.fillStyle = '#ea580c';
+        ctx.fillRect(0, 58, 512, 8);
+        ctx.fillStyle = '#fef08a';
+        for (let d = 16; d < 500; d += 28) {
           ctx.beginPath();
           ctx.arc(d, 45, 6, 0, Math.PI * 2);
           ctx.fill();
         }
 
-        // Sculpted Limestone Corner Quoins & Arched Blind Niche Relief
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.36)';
-        for (let q = 72; q < 430; q += 64) {
-          drawRoundedRectPath(ctx, 12, q, 46, 36, 10);
+        // Sculpted Limestone Corner Quoins & Arched Relief
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.45)';
+        for (let q = 72; q < 430; q += 60) {
+          drawRoundedRectPath(ctx, 10, q, 48, 38, 10);
           ctx.fill();
-          drawRoundedRectPath(ctx, 454, q, 46, 36, 10);
+          drawRoundedRectPath(ctx, 454, q, 48, 38, 10);
           ctx.fill();
-          bumpCtx.fillStyle = '#e0e0e0';
-          drawRoundedRectPath(bumpCtx, 12, q, 46, 36, 10);
+          bumpCtx.fillStyle = '#f0f0f0';
+          drawRoundedRectPath(bumpCtx, 10, q, 48, 38, 10);
           bumpCtx.fill();
         }
         ctx.fillStyle = '#0369a1';
-        ctx.fillRect(0, 466, 512, 46);
+        ctx.fillRect(0, 464, 512, 48);
 
       } else if (type === 'tech_wall') {
         // 🚀 MAP 3: SCI-FI MAGMA-TECH ARMORED CITADEL & NEON CONDUIT WALL
         const armorGrad = ctx.createLinearGradient(0, 0, 0, 512);
-        armorGrad.addColorStop(0, `#${baseCol.getHexString()}`);
-        armorGrad.addColorStop(0.6, `#${darkCol.getHexString()}`);
-        armorGrad.addColorStop(1, '#0f172a');
+        armorGrad.addColorStop(0, #);
+        armorGrad.addColorStop(0.6, #);
+        armorGrad.addColorStop(1, '#0b1120');
         ctx.fillStyle = armorGrad;
         ctx.fillRect(0, 0, 512, 512);
 
         // Beveled Hex-Steel Armor Panels & Rivets
-        ctx.strokeStyle = 'rgba(15, 23, 42, 0.68)';
+        ctx.strokeStyle = 'rgba(15, 23, 42, 0.75)';
         ctx.lineWidth = 6;
         for (let px = 16; px < 496; px += 160) {
-          drawRoundedRectPath(ctx, px, 28, 144, 410, 14);
+          drawRoundedRectPath(ctx, px, 26, 144, 412, 14);
           ctx.stroke();
-          bumpCtx.strokeStyle = '#202020';
-          bumpCtx.lineWidth = 7;
-          drawRoundedRectPath(bumpCtx, px, 28, 144, 410, 14);
+          bumpCtx.strokeStyle = '#181818';
+          bumpCtx.lineWidth = 8;
+          drawRoundedRectPath(bumpCtx, px, 26, 144, 412, 14);
           bumpCtx.stroke();
+          ctx.fillStyle = '#94a3b8';
+          [[px + 12, 38], [px + 132, 38], [px + 12, 426], [px + 132, 426]].forEach(([rx, ry]) => {
+            ctx.beginPath();
+            ctx.arc(rx, ry, 4, 0, Math.PI * 2);
+            ctx.fill();
+          });
         }
 
         // Glowing Neon Cyan & Amber Energy Conduit Strips
-        ctx.fillStyle = '#38bdf8';
-        ctx.fillRect(0, 224, 512, 10);
-        ctx.fillStyle = '#f97316';
-        ctx.fillRect(0, 444, 512, 8);
+        ctx.fillStyle = '#00f0ff';
+        ctx.fillRect(0, 222, 512, 12);
+        ctx.fillStyle = '#ff6b00';
+        ctx.fillRect(0, 442, 512, 10);
 
         // Industrial Hazard Stripes at Base
         ctx.fillStyle = '#eab308';
@@ -1241,7 +1268,6 @@
           ctx.closePath();
           ctx.fill();
         }
-
       } else if (type === 'brick') {
         // 🏡 SHADOW-RICH ANIME STUCCO & TIMBER-FRAME WALL
         const wallGrad = ctx.createLinearGradient(0, 0, 0, 512);
@@ -1607,9 +1633,10 @@
       const winEmissiveCol = currentMapIndex === 2 ? new THREE.Color(0x06b6d4) : new THREE.Color(0xf59e0b);
       const mat = new THREE.MeshStandardMaterial({
         map,
-        bumpMap: null,
-        roughness: isWin ? 0.12 : (type === 'roof' ? 0.55 : 0.75),
-        metalness: isWin ? 0.85 : 0.04,
+        bumpMap: isWin ? null : bumpMap,
+        bumpScale: effectiveBump,
+        roughness: isWin ? 0.08 : (type === 'roof' ? 0.42 : (type === 'wood' ? 0.62 : 0.72)),
+        metalness: isWin ? 0.88 : (type === 'tech_wall' ? 0.45 : 0.05),
         emissive: isWin ? winEmissiveCol : (colorHex === 0xfacc15 || colorHex === 0x06b6d4 ? new THREE.Color(colorHex) : new THREE.Color(0x000000)),
         emissiveIntensity: isWin ? 0.38 : (colorHex === 0xfacc15 || colorHex === 0x06b6d4 ? 0.65 : 0.0),
         transparent: opacity < 1,
@@ -3256,31 +3283,94 @@
         [[0, -14], [0, 54]].forEach(([gx, gz], idx) => {
           const id = `torii_gate_${idx}`;
           const y0 = getTerrainHeightAt(gx, gz);
-          addBlock(1.3, 9.2, 1.3, gx - 5.2, y0 + 4.6, gz, 0xdc2626, id, false, 1, false, 'wood', 'cylinder');
-          addBlock(1.3, 9.2, 1.3, gx + 5.2, y0 + 4.6, gz, 0xdc2626, id, false, 1, false, 'wood', 'cylinder');
-          addBlock(13.6, 0.9, 1.2, gx, y0 + 7.6, gz, 0xdc2626, id, true, 1, false, 'wood');
-          addBlock(15.4, 1.1, 1.8, gx, y0 + 9.4, gz, 0x1e293b, id, true, 1, false, 'roof');
-          addBlock(1.8, 1.6, 0.7, gx, y0 + 8.5, gz, 0xfacc15, id, true, 1, false, 'concrete');
+          addBlock(1.3, 9.2, 1.3, gx - 5.2, y0 + 4.6, gz, 0xdc2626, id, false, 1, false, "wood", "cylinder");
+          addBlock(1.3, 9.2, 1.3, gx + 5.2, y0 + 4.6, gz, 0xdc2626, id, false, 1, false, "wood", "cylinder");
+          addBlock(13.6, 0.9, 1.2, gx, y0 + 7.6, gz, 0xdc2626, id, true, 1, false, "wood");
+          addBlock(15.4, 1.1, 1.8, gx, y0 + 9.4, gz, 0x1e293b, id, true, 1, false, "roof");
+          addBlock(1.8, 1.6, 0.7, gx, y0 + 8.5, gz, 0xfacc15, id, true, 1, false, "concrete");
         });
+
+        // 🏮 Traditional Japanese Stone Toro Lanterns along campus pathways
+        [[-7, -14], [7, -14], [-7, -26], [7, -26], [-7, 16], [7, 16], [-7, 36], [7, 36], [-20, 2], [20, 2]].forEach(([lx, lz], idx) => {
+          const id = `toro_lantern_${idx}`;
+          const ly = getTerrainHeightAt(lx, lz);
+          addBlock(1.1, 0.45, 1.1, lx, ly + 0.22, lz, 0x94a3b8, id, false, 1, false, "rock");
+          addBlock(0.55, 1.3, 0.55, lx, ly + 1.1, lz, 0x64748b, id, false, 1, false, "concrete", "cylinder");
+          addBlock(0.85, 0.85, 0.85, lx, ly + 2.15, lz, 0xf59e0b, id, false, 0.95, false, "window");
+          addBlock(1.35, 0.5, 1.35, lx, ly + 2.8, lz, 0x334155, id, false, 1, false, "roof", "pyramid");
+          addBlock(0.35, 0.35, 0.35, lx, ly + 3.2, lz, 0xfacc15, id, false, 1, false, "concrete", "foliage");
+        });
+
+        // 🌸 Flagstone walkways connecting Campus Quadrant to School Buildings
+        [
+          { w: 5.4, d: 24, x: 0, z: -20 },
+          { w: 24, d: 4.8, x: 14, z: -4 },
+          { w: 24, d: 4.8, x: -14, z: -4 },
+          { w: 5.4, d: 26, x: 0, z: 24 }
+        ].forEach((p, idx) => {
+          const py = getTerrainHeightAt(p.x, p.z);
+          addBlock(p.w, 0.16, p.d, p.x, py + 0.14, p.z, 0xe2e8f0, `walkway_${idx}`, false, 1, true, "concrete");
+        });
+
       } else if (mapIdx === 1) {
         // 🗼 MAP 2 LANDMARKS: Giant Coastal Lighthouse Lantern Beacon & Harbor Archways
         const lx = 0, lz = -34;
         const ly = getTerrainHeightAt(lx, lz) + 4 * 4.6;
-        addBlock(6.4, 4.2, 6.4, lx, ly + 3.2, lz, 0xfef08a, 'lighthouse', true, 0.85, false, 'window', 'cylinder');
-        addBlock(7.6, 2.8, 7.6, lx, ly + 6.4, lz, 0xdc2626, 'lighthouse', true, 1, false, 'roof', 'cone');
+        addBlock(6.4, 4.2, 6.4, lx, ly + 3.2, lz, 0xfef08a, "lighthouse", true, 0.85, false, "window", "cylinder");
+        addBlock(7.6, 2.8, 7.6, lx, ly + 6.4, lz, 0xdc2626, "lighthouse", true, 1, false, "roof", "cone");
         // Mediterranean Triumphal Harbor Arch at South Pier
         const ay = getTerrainHeightAt(0, 44);
-        addBlock(2.2, 8.5, 2.2, -5.2, ay + 4.25, 44, 0xffffff, 'harbor_arch', false, 1, false, 'med_wall');
-        addBlock(2.2, 8.5, 2.2, 5.2, ay + 4.25, 44, 0xffffff, 'harbor_arch', false, 1, false, 'med_wall');
-        addBlock(13.8, 2.2, 2.6, 0, ay + 9.2, 44, 0x0284c7, 'harbor_arch', true, 1, false, 'roof');
+        addBlock(2.2, 8.5, 2.2, -5.2, ay + 4.25, 44, 0xffffff, "harbor_arch", false, 1, false, "med_wall");
+        addBlock(2.2, 8.5, 2.2, 5.2, ay + 4.25, 44, 0xffffff, "harbor_arch", false, 1, false, "med_wall");
+        addBlock(13.8, 2.2, 2.6, 0, ay + 9.2, 44, 0x0284c7, "harbor_arch", true, 1, false, "roof");
+
+        // 💨 Iconic Mediterranean Hillside Windmill with 4 Crossed Timber Sails
+        const wx = -42, wz = -22;
+        const wy = getTerrainHeightAt(wx, wz);
+        const wId = "santorini_windmill";
+        addBlock(6.2, 7.2, 6.2, wx, wy + 3.6, wz, 0xf8fafc, wId, false, 1, false, "med_wall", "cylinder");
+        addBlock(6.8, 2.6, 6.8, wx, wy + 8.5, wz, 0xb45309, wId, true, 1, false, "roof", "cone");
+        addBlock(0.4, 11.0, 0.35, wx, wy + 8.0, wz + 3.4, 0x78350f, wId, false, 1, false, "wood");
+        addBlock(11.0, 0.4, 0.35, wx, wy + 8.0, wz + 3.4, 0x78350f, wId, false, 1, false, "wood");
+        addBlock(1.8, 4.2, 0.15, wx - 3.2, wy + 8.0, wz + 3.45, 0xfef08a, wId, false, 0.9, false, "concrete");
+        addBlock(1.8, 4.2, 0.15, wx + 3.2, wy + 8.0, wz + 3.45, 0xfef08a, wId, false, 0.9, false, "concrete");
+
+        // Coastal Promenade Terrace Steps
+        [
+          { w: 18, d: 5.2, x: 0, z: 28 },
+          { w: 22, d: 5.2, x: 0, z: 36 }
+        ].forEach((p, idx) => {
+          const py = getTerrainHeightAt(p.x, p.z);
+          addBlock(p.w, 0.22, p.d, p.x, py + 0.18, p.z, 0xf8fafc, `promenade_${idx}`, false, 1, true, "med_wall");
+        });
+
       } else {
-        // ⚡ MAP 3 LANDMARKS: Glowing Plasma Energy Pylons & Deep-Space Parabolic Dish
+        // ⚡ MAP 3 LANDMARKS: Glowing Plasma Energy Pylons & Radar Array
         [[-16, -22], [16, -22], [-16, 26], [16, 26]].forEach(([px, pz], idx) => {
           const id = `plasma_pylon_${idx}`;
           const py = getTerrainHeightAt(px, pz);
-          addBlock(1.8, 7.5, 1.8, px, py + 3.75, pz, 0x1e293b, id, false, 1, false, 'tech_wall', 'cylinder');
-          addBlock(2.4, 2.4, 2.4, px, py + 8.2, pz, 0x38bdf8, id, true, 0.9, false, 'window', 'foliage');
+          addBlock(1.8, 7.5, 1.8, px, py + 3.75, pz, 0x1e293b, id, false, 1, false, "tech_wall", "cylinder");
+          addBlock(2.4, 2.4, 2.4, px, py + 8.2, pz, 0x38bdf8, id, true, 0.9, false, "window", "foliage");
         });
+
+        // Heavy Reinforced Catwalks with Cyan LED Marker Lights
+        [
+          { w: 6.2, d: 28, x: 0, z: -18 },
+          { w: 28, d: 6.2, x: 18, z: 2 },
+          { w: 28, d: 6.2, x: -18, z: 2 },
+          { w: 6.2, d: 28, x: 0, z: 22 }
+        ].forEach((r, idx) => {
+          const ry = getTerrainHeightAt(r.x, r.z);
+          addBlock(r.w, 0.25, r.d, r.x, ry + 0.18, r.z, 0x0f172a, `runway_${idx}`, false, 1, true, "tech_wall");
+          addBlock(0.4, 0.3, r.d * 0.9, r.x - r.w * 0.44, ry + 0.22, r.z, 0x06b6d4, `runway_led_l_${idx}`, false, 0.95, false, "window");
+          addBlock(0.4, 0.3, r.d * 0.9, r.x + r.w * 0.44, ry + 0.22, r.z, 0x06b6d4, `runway_led_r_${idx}`, false, 0.95, false, "window");
+        });
+
+        // Rooftop Radar Dish Array
+        const rdx = 22, rdz = -22;
+        const rdy = getTerrainHeightAt(rdx, rdz) + 12;
+        addBlock(1.0, 3.5, 1.0, rdx, rdy + 1.75, rdz, 0x475569, "radar_array", true, 1, false, "tech_wall", "cylinder");
+        addBlock(4.6, 1.2, 4.6, rdx, rdy + 3.6, rdz, 0x0284c7, "radar_array", true, 1, false, "window", "cone");
       }
     }
 
@@ -5697,10 +5787,9 @@
 
     function updateCamera(dt, now) {
       if (!isDraggingCam) {
-        orbitAngle += dt * (gameState === STATE.VICTORY ? 0.35 : 0.15);
+        orbitAngle += dt * (gameState === STATE.VICTORY ? 0.30 : (gameState === STATE.IDLE ? 0.08 : 0.14));
       }
-      const baseAngle = gameState === STATE.IDLE ? Math.sin(orbitAngle * 1.4) * 0.42 : orbitAngle;
-      const totalAngle = baseAngle + userOrbitOffset;
+      const totalAngle = orbitAngle + userOrbitOffset;
 
       if (screenShake > 0) {
         screenShake = Math.max(0, screenShake - dt * 2.8);
